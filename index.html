@@ -1,0 +1,2625 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>SMOKE</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+<style>
+/* БАЗОВЫЕ СТИЛИ */
+body {
+    margin: 0;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #0f0c29, #302b63 30%, #9d4edd 70%, #3c096c);
+    color: #fff;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    text-align: center;
+    position: relative;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    padding-top: 60px;
+}
+
+/* УВЕДОМЛЕНИЯ НА САЙТЕ */
+.notification {
+    position: fixed;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(20, 15, 45, 0.95);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(157, 78, 221, 0.4);
+    border-radius: 12px;
+    padding: 15px 25px;
+    z-index: 2000;
+    display: none;
+    align-items: center;
+    gap: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from { top: -100px; opacity: 0; }
+    to { top: 80px; opacity: 1; }
+}
+
+.notification.success {
+    border-color: #38ef7d;
+    background: rgba(56, 239, 125, 0.1);
+}
+
+.notification.error {
+    border-color: #ff4d4d;
+    background: rgba(255, 77, 77, 0.1);
+}
+
+.notification.warning {
+    border-color: #ffcc00;
+    background: rgba(255, 204, 0, 0.1);
+}
+
+.notification-info {
+    font-size: 0.9rem;
+    color: #d0c0ff;
+}
+
+.close-notification {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background 0.3s;
+}
+
+.close-notification:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.header {
+    padding-top: 2vh;
+    padding-bottom: 2vh;
+    position: relative;
+    overflow: hidden;
+    z-index: 10;
+}
+
+.header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #9d4edd, transparent);
+}
+
+.magazine {
+    font-size: 0.8rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+    color: #d0c0ff;
+    font-weight: 300;
+}
+
+.title {
+    font-size: clamp(2rem, 8vw, 3.5rem);
+    font-weight: 900;
+    letter-spacing: 6px;
+    margin: 0;
+    background: linear-gradient(45deg, #fff, #9d4edd);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 4px 20px rgba(157, 78, 221, 0.3);
+}
+
+.divider {
+    width: min(250px, 70vw);
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #9d4edd 20%, #ff4d8d 50%, #9d4edd 80%, transparent);
+    margin: 12px auto;
+    border-radius: 2px;
+}
+
+/* КНОПКА ФИЛЬТРАЦИИ */
+.filter-container {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    padding: 0 12px 15px;
+    flex-wrap: wrap;
+    max-width: 1400px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 10;
+}
+
+.filter-btn {
+    padding: 8px 16px;
+    border: 1.5px solid rgba(157, 78, 221, 0.4);
+    border-radius: 20px;
+    background: rgba(20, 15, 45, 0.8);
+    color: #d0c0ff;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(10px);
+    letter-spacing: 0.5px;
+    min-width: 90px;
+}
+
+.filter-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 10px rgba(157, 78, 221, 0.3);
+}
+
+.filter-btn.active {
+    background: linear-gradient(45deg, #9d4edd, #6a00ff);
+    color: white;
+    border-color: #9d4edd;
+    box-shadow: 0 3px 15px rgba(157, 78, 221, 0.4);
+}
+
+/* КОНТЕЙНЕР ТОВАРОВ */
+.products {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    padding: 15px 12px 80px;
+    max-width: 1400px;
+    margin: 0 auto;
+    box-sizing: border-box;
+}
+
+/* КАРТОЧКА ТОВАРА */
+.product-item {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 14px;
+    border: 1px solid rgba(157, 78, 221, 0.3);
+    padding: 15px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(8px);
+    min-height: 280px;
+}
+
+.product-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(157, 78, 221, 0.5), transparent);
+}
+
+.product-item:hover {
+    transform: translateY(-3px);
+    border-color: #9d4edd;
+    box-shadow: 0 8px 20px rgba(157, 78, 221, 0.3);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.product-item.delete-mode {
+    border: 2px solid #ffcc00;
+    box-shadow: 0 0 20px rgba(255, 204, 0, 0.6);
+    animation: pulse 2s infinite;
+    cursor: pointer;
+}
+
+.product-item.edit-mode {
+    border: 2px solid #00b4db;
+    box-shadow: 0 0 20px rgba(0, 180, 219, 0.6);
+    cursor: pointer;
+}
+
+.product-category {
+    padding: 5px 12px;
+    border-radius: 15px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 8px;
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+}
+
+.category-liquid { 
+    background: linear-gradient(45deg, #00b4db, #0083b0);
+    color: white;
+}
+.category-pod { 
+    background: linear-gradient(45deg, #ff4d8d, #ff3366);
+    color: white;
+}
+.category-snus { 
+    background: linear-gradient(45deg, #9d4edd, #6a00ff);
+    color: white;
+}
+.category-other { 
+    background: linear-gradient(45deg, #38ef7d, #11998e);
+    color: white;
+}
+
+.product-content {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+}
+
+.product-name {
+    font-size: 1.1rem;
+    font-weight: 800;
+    line-height: 1.3;
+    min-height: 2.4em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    margin-bottom: 5px;
+}
+
+.product-flavor {
+    color: #ffffff;
+    font-size: 0.9rem;
+    font-weight: 600;
+    min-height: 3em;
+    line-height: 1.4;
+    background: rgba(157, 78, 221, 0.15);
+    padding: 8px 10px;
+    border-radius: 10px;
+    border: 2px solid rgba(157, 78, 221, 0.4);
+    margin: 3px 0;
+    flex: 1;
+}
+
+.product-price {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: #9dff9d;
+    margin: 5px 0;
+}
+
+.discount-price {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.original-price {
+    text-decoration: line-through;
+    color: #ff9999;
+    font-size: 1rem;
+    opacity: 0.7;
+}
+
+.discount-badge {
+    background: linear-gradient(45deg, #ff3366, #ff4d8d);
+    color: white;
+    padding: 3px 8px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.price-number::after {
+    content: " BYN";
+    font-size: 0.8em;
+    opacity: 0.9;
+    margin-left: 2px;
+    font-weight: 600;
+}
+
+.quantity-badge {
+    padding: 6px 12px;
+    border: 1.5px solid #9d4edd;
+    border-radius: 15px;
+    background: rgba(157, 78, 221, 0.1);
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: inline-block;
+    margin: 3px auto;
+    width: fit-content;
+}
+
+.quantity-badge.out-of-stock {
+    border-color: #ff4d4d;
+    color: #ff4d4d;
+    background: rgba(255, 77, 77, 0.1);
+}
+
+/* КНОПКИ */
+.buy-btn {
+    padding: 10px 15px;
+    background: linear-gradient(45deg, #9d4edd, #6a00ff);
+    border: none;
+    border-radius: 10px;
+    color: white;
+    font-weight: 700;
+    cursor: pointer;
+    width: 100%;
+    box-sizing: border-box;
+    margin-top: 8px;
+    font-size: 0.9rem;
+    letter-spacing: 0.8px;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+}
+
+.buy-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: 0.5s;
+}
+
+.buy-btn:hover::before {
+    left: 100%;
+}
+
+.buy-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(157, 78, 221, 0.4);
+}
+
+.buy-btn:active {
+    transform: translateY(0);
+}
+
+.buy-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: linear-gradient(45deg, #666, #444);
+}
+
+/* КНОПКИ УПРАВЛЕНИЯ */
+.login-btn-main, .admin-btn-main {
+    padding: 10px 20px;
+    background: linear-gradient(45deg, rgba(157, 78, 221, 0.9), rgba(106, 0, 255, 0.9));
+    border: none;
+    border-radius: 10px;
+    color: white;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 0.9rem;
+    letter-spacing: 0.8px;
+    transition: all 0.3s;
+    position: fixed;
+    z-index: 1000;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.login-btn-main {
+    top: 15px;
+    left: 15px;
+    min-width: 90px;
+}
+
+.admin-btn-main {
+    top: 15px;
+    right: 15px;
+    min-width: 90px;
+    display: none;
+    position: fixed;
+}
+
+.login-btn-main:hover, .admin-btn-main:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(157, 78, 221, 0.4);
+}
+
+/* ФОРМА ЛОГИНА */
+.login-form {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(20, 15, 45, 0.95);
+    border-radius: 20px;
+    padding: 30px 25px;
+    z-index: 2000;
+    width: min(350px, 90vw);
+    display: none;
+    backdrop-filter: blur(25px);
+    border: 1px solid rgba(157, 78, 221, 0.3);
+    box-shadow: 
+        0 20px 40px -10px rgba(0, 0, 0, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+}
+
+.login-form::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #9d4edd, transparent);
+}
+
+.login-form h3 {
+    color: #fff;
+    font-size: 1.6rem;
+    margin: 0 0 25px 0;
+    text-align: center;
+    font-weight: 700;
+    background: linear-gradient(45deg, #fff, #9d4edd);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.login-input-container {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.login-input-container input {
+    width: 100%;
+    padding: 14px 18px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 2px solid rgba(157, 78, 221, 0.3);
+    border-radius: 10px;
+    color: #fff;
+    font-size: 0.95rem;
+    transition: all 0.3s;
+    box-sizing: border-box;
+}
+
+.login-input-container input:focus {
+    outline: none;
+    border-color: #9d4edd;
+    background: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 0 15px rgba(157, 78, 221, 0.3);
+}
+
+.login-input-container input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.login-buttons {
+    display: flex;
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.login-btn, .cancel-login-btn {
+    flex: 1;
+    padding: 13px;
+    border: none;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    letter-spacing: 0.8px;
+}
+
+.login-btn {
+    background: linear-gradient(45deg, #9d4edd, #6a00ff);
+    color: white;
+}
+
+.login-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(157, 78, 221, 0.4);
+}
+
+.cancel-login-btn {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border: 2px solid rgba(157, 78, 221, 0.5);
+}
+
+.cancel-login-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* АДМИН ПАНЕЛЬ */
+.admin-panel {
+    position: fixed;
+    top: 60px;
+    right: 15px;
+    background: rgba(20, 15, 45, 0.95);
+    border-radius: 14px;
+    padding: 20px;
+    z-index: 1000;
+    display: none;
+    backdrop-filter: blur(25px);
+    border: 1px solid rgba(157, 78, 221, 0.3);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+    min-width: 250px;
+}
+
+.admin-panel h3 {
+    color: #fff;
+    margin: 0 0 15px 0;
+    font-size: 1.3rem;
+    text-align: center;
+    font-weight: 700;
+}
+
+.admin-btn, .logout-btn {
+    width: 100%;
+    padding: 12px;
+    margin: 6px 0;
+    border: none;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.admin-btn {
+    background: linear-gradient(45deg, #9d4edd, #6a00ff);
+    color: white;
+}
+
+.admin-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(157, 78, 221, 0.4);
+}
+
+.admin-btn.edit-btn {
+    background: linear-gradient(45deg, #00b4db, #0083b0);
+}
+
+.admin-btn.delete-btn {
+    background: linear-gradient(45deg, #ff4d4d, #d43f3f);
+}
+
+.admin-btn.stats-btn {
+    background: linear-gradient(45deg, #8e2de2, #4a00e0);
+}
+
+.logout-btn {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border: 2px solid rgba(157, 78, 221, 0.3);
+    margin-top: 12px;
+}
+
+.logout-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* МОДАЛЬНЫЕ ОКНА */
+.add-modal, .edit-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(20, 15, 45, 0.95);
+    border-radius: 20px;
+    padding: 30px 25px;
+    z-index: 2000;
+    width: min(400px, 90vw);
+    display: none;
+    backdrop-filter: blur(25px);
+    border: 1px solid rgba(157, 78, 221, 0.3);
+    box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5);
+}
+
+.add-modal h3, .edit-modal h3 {
+    color: #fff;
+    font-size: 1.6rem;
+    margin: 0 0 25px 0;
+    text-align: center;
+    font-weight: 700;
+}
+
+.modal-input-container {
+    position: relative;
+    margin-bottom: 15px;
+}
+
+.modal-input-container input,
+.modal-input-container select {
+    width: 100%;
+    padding: 13px 18px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 2px solid rgba(157, 78, 221, 0.3);
+    border-radius: 10px;
+    color: #fff;
+    font-size: 0.95rem;
+    transition: all 0.3s;
+    box-sizing: border-box;
+}
+
+.modal-input-container select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' fill='%239d4edd' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 18px center;
+    background-size: 10px;
+}
+
+.modal-input-container input:focus,
+.modal-input-container select:focus {
+    outline: none;
+    border-color: #9d4edd;
+    background: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 0 15px rgba(157, 78, 221, 0.3);
+}
+
+.modal-input-container select option {
+    background: #1a1a2e;
+    color: #fff;
+}
+
+.discount-container {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.discount-input {
+    padding: 13px 18px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 2px solid rgba(157, 78, 221, 0.3);
+    border-radius: 10px;
+    color: #fff;
+    font-size: 0.95rem;
+    transition: all 0.3s;
+    box-sizing: border-box;
+}
+
+.discount-input:focus {
+    outline: none;
+    border-color: #9d4edd;
+    background: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 0 15px rgba(157, 78, 221, 0.3);
+}
+
+.modal-buttons {
+    display: flex;
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.confirm-modal-btn, .cancel-modal-btn {
+    flex: 1;
+    padding: 13px;
+    border: none;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.confirm-modal-btn {
+    background: linear-gradient(45deg, #9d4edd, #6a00ff);
+    color: white;
+}
+
+.confirm-modal-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(157, 78, 221, 0.4);
+}
+
+.cancel-modal-btn {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border: 2px solid rgba(157, 78, 221, 0.5);
+}
+
+.cancel-modal-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* МОДАЛЬНОЕ ОКНО ПОКУПКИ */
+.buy-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(20, 15, 45, 0.98);
+    border-radius: 20px;
+    padding: 30px 25px;
+    z-index: 2000;
+    width: min(380px, 90vw);
+    display: none;
+    backdrop-filter: blur(30px);
+    border: 1px solid rgba(157, 78, 221, 0.4);
+    box-shadow: 
+        0 25px 50px rgba(0, 0, 0, 0.6),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.buy-modal h3 {
+    color: #fff;
+    font-size: 1.5rem;
+    margin: 0 0 15px 0;
+    text-align: center;
+    font-weight: 700;
+}
+
+.order-text-block {
+    background: linear-gradient(135deg, rgba(157, 78, 221, 0.1), rgba(106, 0, 255, 0.1));
+    border: 2px solid rgba(157, 78, 221, 0.3);
+    border-radius: 14px;
+    padding: 20px;
+    margin: 15px 0 20px;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+}
+
+.order-text-block::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(157, 78, 221, 0.5), transparent);
+}
+
+.order-text-block:hover {
+    background: linear-gradient(135deg, rgba(157, 78, 221, 0.15), rgba(106, 0, 255, 0.15));
+    border-color: #9d4edd;
+    transform: translateY(-2px);
+}
+
+.order-text {
+    font-family: 'Courier New', monospace;
+    color: #d0c0ff;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    margin: 0;
+}
+
+.telegram-info {
+    background: linear-gradient(135deg, rgba(0, 136, 204, 0.1), rgba(157, 78, 221, 0.1));
+    border: 2px solid rgba(0, 136, 204, 0.3);
+    border-radius: 14px;
+    padding: 18px;
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.telegram-info a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    color: inherit;
+}
+
+.telegram-icon {
+    width: 45px;
+    height: 45px;
+    background: linear-gradient(45deg, #0088cc, #00aced);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+}
+
+.telegram-text {
+    flex: 1;
+}
+
+.telegram-title {
+    font-weight: 700;
+    font-size: 1rem;
+    margin-bottom: 3px;
+    color: #fff;
+}
+
+.telegram-subtitle {
+    color: #66ccff;
+    font-size: 0.85rem;
+    opacity: 0.9;
+}
+
+.close-buy-btn {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(45deg, #9d4edd, #6a00ff);
+    border: none;
+    border-radius: 10px;
+    color: white;
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    letter-spacing: 0.8px;
+}
+
+.close-buy-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(157, 78, 221, 0.4);
+}
+
+/* ОВЕРЛЕЙ */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 1500;
+    display: none;
+    backdrop-filter: blur(5px);
+}
+
+/* КНОПКИ ВЫХОДА ИЗ РЕЖИМОВ */
+.exit-delete-btn {
+    position: fixed;
+    bottom: 25px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 12px 30px;
+    background: linear-gradient(45deg, #ff4d4d, #d43f3f);
+    border: none;
+    border-radius: 50px;
+    color: white;
+    font-weight: 700;
+    cursor: pointer;
+    z-index: 1000;
+    display: none;
+    font-size: 0.95rem;
+    letter-spacing: 0.8px;
+    box-shadow: 0 4px 15px rgba(255, 77, 77, 0.4);
+    transition: all 0.3s;
+}
+
+.exit-edit-btn {
+    position: fixed;
+    bottom: 25px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 12px 30px;
+    background: linear-gradient(45deg, #00b4db, #0083b0);
+    border: none;
+    border-radius: 50px;
+    color: white;
+    font-weight: 700;
+    cursor: pointer;
+    z-index: 1000;
+    display: none;
+    font-size: 0.95rem;
+    letter-spacing: 0.8px;
+    box-shadow: 0 4px 15px rgba(0, 180, 219, 0.4);
+    transition: all 0.3s;
+}
+
+.exit-delete-btn:hover, .exit-edit-btn:hover {
+    transform: translateX(-50%) translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+
+.copy-info {
+    text-align: center;
+    margin-top: 8px;
+    color: #66ccff;
+    font-size: 0.8rem;
+    font-style: italic;
+    opacity: 0.8;
+}
+
+/* МОДАЛЬНОЕ ОКНО СТАТИСТИКИ */
+.stats-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(20, 15, 45, 0.98);
+    border-radius: 20px;
+    padding: 25px;
+    z-index: 2000;
+    width: min(400px, 90vw);
+    display: none;
+    backdrop-filter: blur(30px);
+    border: 1px solid rgba(157, 78, 221, 0.4);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6);
+}
+
+/* МОДАЛЬНОЕ ОКНО УПРАВЛЕНИЯ РЕЗЕРВНЫМИ КОПИЯМИ */
+.backup-modal, .backup-menu-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(20, 15, 45, 0.98);
+    border-radius: 20px;
+    padding: 25px;
+    z-index: 2000;
+    width: min(500px, 90vw);
+    max-height: 80vh;
+    display: none;
+    backdrop-filter: blur(30px);
+    border: 1px solid rgba(157, 78, 221, 0.4);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6);
+    overflow-y: auto;
+}
+
+/* АДАПТИВНОСТЬ */
+@media (max-width: 480px) {
+    body {
+        padding-top: 50px;
+    }
+    
+    .notification {
+        top: 65px;
+    }
+    
+    @keyframes slideDown {
+        from { top: -100px; opacity: 0; }
+        to { top: 65px; opacity: 1; }
+    }
+    
+    .products {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+        padding: 12px 10px 70px;
+    }
+    
+    .product-item {
+        padding: 12px 10px;
+        min-height: 260px;
+    }
+    
+    .product-flavor {
+        font-size: 0.85rem;
+        padding: 7px 9px;
+        min-height: 2.8em;
+    }
+    
+    .product-name {
+        font-size: 1rem;
+        min-height: 2.2em;
+    }
+    
+    .login-btn-main, .admin-btn-main {
+        padding: 8px 16px;
+        font-size: 0.85rem;
+        top: 10px;
+        left: 10px;
+        right: 10px;
+        min-width: 80px;
+    }
+    
+    .admin-panel {
+        top: 50px;
+        right: 10px;
+        min-width: 220px;
+    }
+    
+    .filter-container {
+        gap: 6px;
+        padding: 0 10px 12px;
+    }
+    
+    .filter-btn {
+        padding: 7px 14px;
+        font-size: 0.8rem;
+        min-width: 80px;
+    }
+    
+    .login-form, .add-modal, .edit-modal, .buy-modal, .stats-modal, .backup-modal, .backup-menu-modal {
+        padding: 25px 20px;
+    }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+    .products {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+    
+    .admin-panel {
+        right: 15px;
+    }
+}
+
+@media (min-width: 769px) {
+    .products {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        padding: 20px 15px 90px;
+    }
+    
+    .product-item {
+        min-height: 290px;
+    }
+    
+    .admin-panel {
+        right: 20px;
+    }
+}
+
+@media (min-width: 1200px) {
+    .products {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 18px;
+        padding: 25px 20px 100px;
+    }
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 15px rgba(255, 204, 0, 0.5); }
+    50% { box-shadow: 0 0 25px rgba(255, 204, 0, 0.9); }
+    100% { box-shadow: 0 0 15px rgba(255, 204, 0, 0.5); }
+}
+</style>
+</head>
+<body>
+
+<!-- Уведомления сайта -->
+<div class="notification" id="notification">
+    <span class="notification-info" id="notificationText"></span>
+    <button class="close-notification" onclick="closeNotification()">×</button>
+</div>
+
+<!-- Кнопки управления -->
+<button class="login-btn-main" id="loginBtn" onclick="showLoginForm()">Войти</button>
+<button class="admin-btn-main" id="adminBtn" onclick="toggleAdminPanel()">Админ</button>
+
+<!-- Красивая форма логина -->
+<div class="login-form" id="loginForm">
+    <h3>Вход для админа</h3>
+    <div class="login-input-container">
+        <input type="password" id="adminPassword" placeholder="Введите пароль" autocomplete="off">
+    </div>
+    <div class="login-buttons">
+        <button class="login-btn" onclick="login()">Войти</button>
+        <button class="cancel-login-btn" onclick="hideLoginForm()">Отмена</button>
+    </div>
+</div>
+
+<!-- Админ панель -->
+<div class="admin-panel" id="adminPanel">
+    <h3>Панель управления</h3>
+    
+    <button class="admin-btn" onclick="showAddModal()">Добавить товар</button>
+    <button class="admin-btn edit-btn" onclick="startEditMode()">Редактировать товары</button>
+    <button class="admin-btn delete-btn" onclick="startDeleteMode()">Удалить товары</button>
+    <button class="admin-btn stats-btn" onclick="showStatsModal()">Статистика</button>
+    <button class="admin-btn" onclick="showBackupMenu()" style="background: linear-gradient(45deg, #ffcc00, #ff9900);">
+        Резервная копия
+    </button>
+    <button class="logout-btn" onclick="logout()">Выйти</button>
+</div>
+
+<!-- Модальное окно статистики -->
+<div class="stats-modal" id="statsModal">
+    <h3>Статистика магазина</h3>
+    
+    <div id="statsContent" style="
+        background: rgba(20, 15, 45, 0.6);
+        border-radius: 10px;
+        padding: 20px;
+        margin: 15px 0;
+        border: 1px solid rgba(157, 78, 221, 0.3);
+        text-align: center;
+    ">
+        <div style="color: #d0c0ff; font-size: 0.9rem; margin-bottom: 15px;">
+            Загрузка статистики...
+        </div>
+    </div>
+    
+    <div class="modal-buttons">
+        <button class="confirm-modal-btn" onclick="closeStatsModal()">Закрыть</button>
+    </div>
+</div>
+
+<!-- Модальное окно добавления товара -->
+<div class="add-modal" id="addModal">
+    <h3>Добавить товар</h3>
+    <div class="modal-input-container">
+        <input type="text" id="productName" placeholder="Название товара" required>
+    </div>
+    <div class="modal-input-container">
+        <input type="text" id="productFlavor" placeholder="Вкус/Бренд/Тип" required>
+    </div>
+    <div class="modal-input-container">
+        <select id="productCategory" required onchange="updateFlavorPlaceholder()">
+            <option value="" disabled selected>Выберите категорию</option>
+            <option value="liquid">Жидкость</option>
+            <option value="pod">Под-система</option>
+            <option value="snus">Снюс</option>
+            <option value="other">Расходник</option>
+        </select>
+    </div>
+    <div class="modal-input-container">
+        <input type="number" id="productPrice" placeholder="Цена (BYN)" min="0" step="0.01" required>
+    </div>
+    <div class="discount-container">
+        <input type="number" class="discount-input" id="productDiscount" placeholder="Скидка % (0-99)" min="0" max="99" step="1">
+        <select class="discount-input" id="discountType">
+            <option value="percent">%</option>
+            <option value="fixed">BYN</option>
+        </select>
+    </div>
+    <div class="modal-input-container">
+        <input type="number" id="productQuantity" placeholder="Количество" min="0" required>
+    </div>
+    <div class="modal-buttons">
+        <button class="confirm-modal-btn" onclick="addProduct()">Добавить</button>
+        <button class="cancel-modal-btn" onclick="closeAddModal()">Отмена</button>
+    </div>
+</div>
+
+<!-- Модальное окно редактирования товара -->
+<div class="edit-modal" id="editModal">
+    <h3>Редактировать товар</h3>
+    <div class="modal-input-container">
+        <input type="text" id="editProductName" placeholder="Название товара" required>
+    </div>
+    <div class="modal-input-container">
+        <input type="text" id="editProductFlavor" placeholder="Вкус/Бренд/Тип" required>
+    </div>
+    <div class="modal-input-container">
+        <select id="editProductCategory" required onchange="updateEditFlavorPlaceholder()">
+            <option value="liquid">Жидкость</option>
+            <option value="pod">Под-система</option>
+            <option value="snus">Снюс</option>
+            <option value="other">Расходник</option>
+        </select>
+    </div>
+    <div class="modal-input-container">
+        <input type="number" id="editProductPrice" placeholder="Цена (BYN)" min="0" step="0.01" required>
+    </div>
+    <div class="discount-container">
+        <input type="number" class="discount-input" id="editProductDiscount" placeholder="Скидка % (0-99)" min="0" max="99" step="1">
+        <select class="discount-input" id="editDiscountType">
+            <option value="percent">%</option>
+            <option value="fixed">BYN</option>
+        </select>
+    </div>
+    <div class="modal-input-container">
+        <input type="number" id="editProductQuantity" placeholder="Количество" min="0" required>
+    </div>
+    <div class="modal-buttons">
+        <button class="confirm-modal-btn" onclick="saveProductEdit()">Сохранить</button>
+        <button class="cancel-modal-btn" onclick="closeEditModal()">Отмена</button>
+    </div>
+</div>
+
+<!-- Модальное окно покупки -->
+<div class="buy-modal" id="buyModal">
+    <h3>Оформление заказа</h3>
+    <div class="order-text-block" id="orderTextBlock">
+        <div class="order-text" id="orderText"></div>
+    </div>
+    <div class="copy-info">Нажмите на текст выше, чтобы скопировать</div>
+    <div class="telegram-info">
+        <a href="https://t.me/tat02w" target="_blank">
+            <div class="telegram-icon">✈</div>
+            <div class="telegram-text">
+                <div class="telegram-title">Свяжитесь в Telegram</div>
+                <div class="telegram-subtitle">Нажмите, чтобы написать @tat02w</div>
+            </div>
+        </a>
+    </div>
+    <button class="close-buy-btn" onclick="closeBuyModal()">Закрыть</button>
+</div>
+
+<!-- Меню резервного копирования -->
+<div class="backup-menu-modal" id="backupMenuModal">
+    <h3>Резервное копирование</h3>
+    
+    <button class="admin-btn" onclick="exportProducts()" style="margin-bottom: 10px; background: linear-gradient(45deg, #38ef7d, #11998e);">
+        Экспорт товаров
+    </button>
+    <button class="admin-btn" onclick="importProducts()" style="margin-bottom: 10px; background: linear-gradient(45deg, #ff9a00, #ff5e00);">
+        Импорт товаров
+    </button>
+    <button class="admin-btn" onclick="showBackupManager()" style="margin-bottom: 10px; background: linear-gradient(45deg, #ffcc00, #ff9900);">
+        Резервные копии
+    </button>
+    
+    <div class="modal-buttons">
+        <button class="cancel-modal-btn" onclick="closeBackupMenu()">Закрыть</button>
+    </div>
+</div>
+
+<!-- Модальное окно управления резервными копиями -->
+<div class="backup-modal" id="backupModal">
+    <h3>Резервные копии</h3>
+    
+    <div id="backupList" style="
+        max-height: 300px;
+        overflow-y: auto;
+        margin: 15px 0;
+        padding: 10px;
+        background: rgba(0,0,0,0.2);
+        border-radius: 10px;
+        border: 1px solid rgba(157,78,221,0.3);
+    ">
+        <div style="text-align:center;color:#aaa;padding:20px;">
+            Загрузка резервных копий...
+        </div>
+    </div>
+    
+    <div class="modal-buttons">
+        <button class="confirm-modal-btn" onclick="createManualBackup()" style="background:linear-gradient(45deg, #9d4edd, #6a00ff);">
+            Создать резервную копию
+        </button>
+        <button class="cancel-modal-btn" onclick="closeBackupModal()">Закрыть</button>
+    </div>
+</div>
+
+<!-- Кнопка выхода из режима удаления -->
+<button class="exit-delete-btn" id="exitDeleteBtn" onclick="exitDeleteMode()">✕ Отменить удаление</button>
+
+<!-- Кнопка выхода из режима редактирования -->
+<button class="exit-edit-btn" id="exitEditBtn" onclick="exitEditMode()">✕ Завершить редактирование</button>
+
+<!-- Модальное окно удаления -->
+<div class="add-modal delete-modal" id="deleteModal">
+    <h3>Удаление товара</h3>
+    <p id="deleteProductInfo" style="color: #d0c0ff; text-align: center; margin: 20px 0;">Вы уверены, что хотите удалить этот товар?</p>
+    <div class="modal-buttons">
+        <button class="confirm-modal-btn" onclick="confirmDelete()" style="background: linear-gradient(45deg, #ff4d4d, #d43f3f);">Удалить</button>
+        <button class="cancel-modal-btn" onclick="cancelDelete()">Отмена</button>
+    </div>
+</div>
+
+<!-- Оверлей -->
+<div class="overlay" id="overlay" onclick="closeAllModals()"></div>
+
+<!-- Шапка -->
+<div class="header">
+    <div class="magazine">магазин</div>
+    <div class="title">SMOKE</div>
+    <div class="divider"></div>
+</div>
+
+<!-- Фильтры -->
+<div class="filter-container" id="filterContainer">
+    <button class="filter-btn active" onclick="filterProducts('all')">Все товары</button>
+    <button class="filter-btn" onclick="filterProducts('liquid')">Жидкости</button>
+    <button class="filter-btn" onclick="filterProducts('pod')">Под-системы</button>
+    <button class="filter-btn" onclick="filterProducts('snus')">Снюс</button>
+    <button class="filter-btn" onclick="filterProducts('other')">Расходники</button>
+</div>
+
+<!-- Товары -->
+<div class="products" id="productsContainer">
+    <div style="grid-column:1/-1; padding: 40px; color: #aaa;" id="loadingText">
+        Загрузка товаров...
+    </div>
+</div>
+
+<script>
+// ====================== НАСТРОЙКА FIREBASE ======================
+const firebaseConfig = {
+  apiKey: "AIzaSyAKqapbYPKkvnp63IANSSDj5NBTITz49yk",
+  authDomain: "smoke-shop-982fb.firebaseapp.com",
+  databaseURL: "https://smoke-shop-982fb-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "smoke-shop-982fb",
+  storageBucket: "smoke-shop-982fb.firebasestorage.app",
+  messagingSenderId: "1037879903984",
+  appId: "1:1037879903984:web:57b4269729cac1cc6a2435",
+  measurementId: "G-NRB44ZW03M"
+};
+
+firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
+
+// ====================== ПЕРЕМЕННЫЕ ======================
+let deleteMode = false;
+let editMode = false;
+let productToDelete = null;
+let currentProductId = null;
+let orderText = '';
+let currentFilter = 'all';
+let productsRef = null;
+let isOperationInProgress = false;
+
+// ====================== УВЕДОМЛЕНИЯ ======================
+function showNotification(message, type = 'info', duration = 3000) {
+    const notification = document.getElementById('notification');
+    const notificationText = document.getElementById('notificationText');
+    
+    notificationText.textContent = message;
+    notification.className = 'notification ' + type;
+    notification.style.display = 'flex';
+    
+    if (duration > 0) {
+        setTimeout(() => {
+            notification.style.display = 'none';
+        }, duration);
+    }
+}
+
+function closeNotification() {
+    document.getElementById('notification').style.display = 'none';
+}
+
+// ====================== ПРОСТАЯ СИСТЕМА ПАРОЛЯ 2610K ======================
+function login() {
+    const password = document.getElementById('adminPassword').value;
+    
+    if (!password) {
+        showNotification('Введите пароль', 'error');
+        return;
+    }
+    
+    if (password === "2610K") {
+        localStorage.setItem('smoke_admin', 'true');
+        document.getElementById('loginBtn').style.display = 'none';
+        document.getElementById('adminBtn').style.display = 'block';
+        hideLoginForm();
+        showNotification('✅ Вход выполнен успешно!', 'success');
+    } else {
+        showNotification('❌ Неверный пароль!', 'error');
+        document.getElementById('adminPassword').value = '';
+        document.getElementById('adminPassword').focus();
+    }
+}
+
+function logout() {
+    if (confirm('Вы уверены, что хотите выйти?')) {
+        localStorage.removeItem('smoke_admin');
+        document.getElementById('loginBtn').style.display = 'block';
+        document.getElementById('adminBtn').style.display = 'none';
+        document.getElementById('adminPanel').style.display = 'none';
+        exitDeleteMode();
+        exitEditMode();
+        showNotification('👋 Вы вышли из системы', 'info');
+    }
+}
+
+function checkAuth() {
+    if (localStorage.getItem('smoke_admin') === 'true') {
+        document.getElementById('loginBtn').style.display = 'none';
+        document.getElementById('adminBtn').style.display = 'block';
+    }
+}
+
+function showLoginForm() {
+    document.getElementById('overlay').style.display = 'block';
+    document.getElementById('loginForm').style.display = 'block';
+    document.getElementById('adminPassword').focus();
+}
+
+function hideLoginForm() {
+    document.getElementById('overlay').style.display = 'none';
+    document.getElementById('loginForm').style.display = 'none';
+    document.getElementById('adminPassword').value = '';
+}
+
+function toggleAdminPanel() {
+    const panel = document.getElementById('adminPanel');
+    const isVisible = panel.style.display === 'block';
+    
+    closeAllModals();
+    document.getElementById('loginForm').style.display = 'none';
+    
+    panel.style.display = isVisible ? 'none' : 'block';
+}
+
+// ====================== FIREBASE ФУНКЦИИ ======================
+function loadProducts() {
+    try {
+        if (productsRef) {
+            productsRef.off();
+        }
+        
+        productsRef = database.ref('products');
+        
+        productsRef.on('value', (snapshot) => {
+            const products = snapshot.val();
+            const container = document.getElementById('productsContainer');
+            
+            if (products) {
+                const productsArray = Object.keys(products).map(productId => ({
+                    id: productId,
+                    ...products[productId]
+                }));
+                
+                displayProducts(productsArray);
+            } else {
+                container.innerHTML = 
+                    '<div style="grid-column:1/-1;color:#aaa;padding:40px;font-size:1.1rem;text-align:center;">Товаров пока нет<br><small>Добавьте первый товар через админ-панель</small></div>';
+            }
+        });
+        
+    } catch (error) {
+        console.error("Ошибка Firebase:", error);
+        document.getElementById('loadingText').innerHTML = 
+            'Ошибка подключения к базе данных';
+    }
+}
+
+function displayProducts(productsArray) {
+    const container = document.getElementById('productsContainer');
+    container.innerHTML = '';
+    
+    const filteredProducts = currentFilter === 'all' 
+        ? productsArray 
+        : productsArray.filter(product => product.category === currentFilter);
+    
+    if (filteredProducts.length === 0) {
+        container.innerHTML = 
+            '<div style="grid-column:1/-1;color:#aaa;padding:40px;font-size:1.1rem;text-align:center;">Нет товаров в этой категории</div>';
+        return;
+    }
+    
+    filteredProducts.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+    
+    filteredProducts.forEach(product => {
+        container.appendChild(createProductElement(product, product.id));
+    });
+    
+    restoreModes();
+}
+
+function restoreModes() {
+    if (deleteMode) {
+        enableDeleteMode();
+    } else if (editMode) {
+        enableEditMode();
+    }
+}
+
+function createProductElement(product, productId) {
+    const div = document.createElement('div');
+    div.className = 'product-item';
+    div.dataset.id = productId;
+    div.dataset.category = product.category || 'other';
+    
+    const quantity = parseInt(product.quantity || 0);
+    const quantityText = quantity === 0 ? 'Нет в наличии' : `Осталось: ${quantity} шт.`;
+    const quantityClass = quantity === 0 ? 'quantity-badge out-of-stock' : 'quantity-badge';
+    
+    const category = product.category || 'other';
+    const categoryInfo = {
+        liquid: { name: "Жидкость", class: "category-liquid" },
+        pod: { name: "Под-система", class: "category-pod" },
+        snus: { name: "Снюс", class: "category-snus" },
+        other: { name: "Расходник", class: "category-other" }
+    }[category] || { name: "Расходник", class: "category-other" };
+    
+    const originalPrice = parseFloat(product.price || 0);
+    let finalPrice = originalPrice;
+    let discountText = '';
+    
+    if (product.discount && product.discount > 0) {
+        if (product.discountType === 'percent') {
+            finalPrice = originalPrice * (1 - product.discount / 100);
+            discountText = `-${product.discount}%`;
+        } else if (product.discountType === 'fixed') {
+            finalPrice = originalPrice - product.discount;
+            discountText = `-${product.discount} BYN`;
+        }
+        finalPrice = Math.max(0, finalPrice);
+    }
+    
+    const categoryDiv = document.createElement('div');
+    categoryDiv.className = `product-category ${categoryInfo.class}`;
+    categoryDiv.textContent = categoryInfo.name;
+    
+    const contentDiv = document.createElement('div');
+    contentDiv.className = 'product-content';
+    
+    const nameDiv = document.createElement('div');
+    nameDiv.className = 'product-name';
+    nameDiv.textContent = product.name || 'Без названия';
+    
+    const flavorDiv = document.createElement('div');
+    flavorDiv.className = 'product-flavor';
+    
+    switch(category) {
+        case 'pod':
+            flavorDiv.textContent = product.flavor || 'Бренд не указан';
+            break;
+        case 'other':
+            flavorDiv.textContent = product.flavor || 'Тип не указан';
+            break;
+        default:
+            flavorDiv.textContent = product.flavor || 'Вкус не указан';
+    }
+    
+    const priceDiv = document.createElement('div');
+    priceDiv.className = 'product-price';
+    
+    if (product.discount && product.discount > 0) {
+        const discountContainer = document.createElement('div');
+        discountContainer.className = 'discount-price';
+        
+        const originalPriceSpan = document.createElement('span');
+        originalPriceSpan.className = 'original-price';
+        originalPriceSpan.textContent = originalPrice.toFixed(2);
+        
+        const finalPriceSpan = document.createElement('span');
+        finalPriceSpan.className = 'price-number';
+        finalPriceSpan.textContent = finalPrice.toFixed(2);
+        
+        const discountBadge = document.createElement('span');
+        discountBadge.className = 'discount-badge';
+        discountBadge.textContent = discountText;
+        
+        discountContainer.appendChild(originalPriceSpan);
+        discountContainer.appendChild(finalPriceSpan);
+        discountContainer.appendChild(discountBadge);
+        priceDiv.appendChild(discountContainer);
+    } else {
+        const priceSpan = document.createElement('span');
+        priceSpan.className = 'price-number';
+        priceSpan.textContent = originalPrice.toFixed(2);
+        priceDiv.appendChild(priceSpan);
+    }
+    
+    const quantityDiv = document.createElement('div');
+    quantityDiv.className = quantityClass;
+    quantityDiv.textContent = quantityText;
+    
+    const buyBtn = document.createElement('button');
+    buyBtn.className = 'buy-btn';
+    buyBtn.onclick = (e) => {
+        e.stopPropagation();
+        showBuyModal(productId, category);
+    };
+    buyBtn.textContent = quantity === 0 ? 'НЕТ В НАЛИЧИИ' : 'КУПИТЬ';
+    if (quantity === 0) buyBtn.disabled = true;
+    
+    contentDiv.appendChild(nameDiv);
+    contentDiv.appendChild(flavorDiv);
+    contentDiv.appendChild(priceDiv);
+    contentDiv.appendChild(quantityDiv);
+    contentDiv.appendChild(buyBtn);
+    
+    div.appendChild(categoryDiv);
+    div.appendChild(contentDiv);
+    
+    return div;
+}
+
+function updateFlavorPlaceholder() {
+    const category = document.getElementById('productCategory').value;
+    const input = document.getElementById('productFlavor');
+    
+    switch(category) {
+        case 'pod':
+            input.placeholder = 'Бренд';
+            break;
+        case 'other':
+            input.placeholder = 'Тип';
+            break;
+        default:
+            input.placeholder = 'Вкус/Описание';
+    }
+}
+
+function updateEditFlavorPlaceholder() {
+    const category = document.getElementById('editProductCategory').value;
+    const input = document.getElementById('editProductFlavor');
+    
+    switch(category) {
+        case 'pod':
+            input.placeholder = 'Бренд';
+            break;
+        case 'other':
+            input.placeholder = 'Тип';
+            break;
+        default:
+            input.placeholder = 'Вкус/Описание';
+    }
+}
+
+// ====================== СТАТИСТИКА ======================
+async function showStatsModal() {
+    document.getElementById('overlay').style.display = 'block';
+    document.getElementById('statsModal').style.display = 'block';
+    document.getElementById('adminPanel').style.display = 'none';
+    
+    await loadStats();
+}
+
+function closeStatsModal() {
+    document.getElementById('overlay').style.display = 'none';
+    document.getElementById('statsModal').style.display = 'none';
+}
+
+async function loadStats() {
+    try {
+        const snapshot = await database.ref('products').once('value');
+        const products = snapshot.val();
+        
+        const statsContent = document.getElementById('statsContent');
+        
+        if (!products) {
+            statsContent.innerHTML = 
+                '<div style="color:#aaa;padding:20px;text-align:center;">Нет товаров для статистики</div>';
+            return;
+        }
+        
+        const productsArray = Object.values(products);
+        const totalProducts = productsArray.length;
+        
+        // Общая стоимость всех товаров
+        const totalValue = productsArray.reduce((sum, p) => {
+            const price = parseFloat(p.price) || 0;
+            const quantity = parseInt(p.quantity) || 0;
+            return sum + (price * quantity);
+        }, 0);
+        
+        // Товары без скидки и со скидкой
+        const withoutDiscount = productsArray.filter(p => !p.discount || p.discount <= 0).length;
+        const withDiscount = totalProducts - withoutDiscount;
+        
+        // Товары в наличии и нет
+        const inStock = productsArray.filter(p => {
+            const quantity = parseInt(p.quantity) || 0;
+            return quantity > 0;
+        }).length;
+        const outOfStock = totalProducts - inStock;
+        
+        // Количество по категориям
+        const categories = {
+            liquid: 0,
+            pod: 0,
+            snus: 0,
+            other: 0
+        };
+        
+        productsArray.forEach(product => {
+            const cat = product.category || 'other';
+            if (categories.hasOwnProperty(cat)) {
+                categories[cat]++;
+            }
+        });
+        
+        // Компактная статистика в 2 колонки
+        statsContent.innerHTML = `
+            <div style="
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 15px;
+                text-align: center;
+            ">
+                <div style="padding: 10px;">
+                    <div style="color: #d0c0ff; font-size: 0.85rem; margin-bottom: 5px;">Всего товаров</div>
+                    <div style="color: #9d4edd; font-weight: 700; font-size: 1.2rem;">${totalProducts}</div>
+                </div>
+                
+                <div style="padding: 10px;">
+                    <div style="color: #d0c0ff; font-size: 0.85rem; margin-bottom: 5px;">В наличии</div>
+                    <div style="color: #38ef7d; font-weight: 700; font-size: 1.2rem;">${inStock}</div>
+                </div>
+                
+                <div style="padding: 10px;">
+                    <div style="color: #d0c0ff; font-size: 0.85rem; margin-bottom: 5px;">Нет в наличии</div>
+                    <div style="color: #ff4d4d; font-weight: 700; font-size: 1.2rem;">${outOfStock}</div>
+                </div>
+                
+                <div style="padding: 10px;">
+                    <div style="color: #d0c0ff; font-size: 0.85rem; margin-bottom: 5px;">Общая стоимость</div>
+                    <div style="color: #ffcc00; font-weight: 700; font-size: 1.1rem;">${totalValue.toFixed(2)} BYN</div>
+                </div>
+                
+                <div style="padding: 10px;">
+                    <div style="color: #d0c0ff; font-size: 0.85rem; margin-bottom: 5px;">Со скидкой</div>
+                    <div style="color: #ff4d8d; font-weight: 700; font-size: 1.2rem;">${withDiscount}</div>
+                </div>
+                
+                <div style="padding: 10px;">
+                    <div style="color: #d0c0ff; font-size: 0.85rem; margin-bottom: 5px;">Без скидки</div>
+                    <div style="color: #00b4db; font-weight: 700; font-size: 1.2rem;">${withoutDiscount}</div>
+                </div>
+            </div>
+            
+            <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid rgba(157,78,221,0.3);">
+                <div style="color: #fff; font-weight: 600; margin-bottom: 10px; font-size: 0.9rem;">По категориям:</div>
+                <div style="
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 8px;
+                    font-size: 0.85rem;
+                ">
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: #d0c0ff;">Жидкости:</span>
+                        <span style="color: #fff; font-weight: 600;">${categories.liquid}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: #d0c0ff;">Под-системы:</span>
+                        <span style="color: #fff; font-weight: 600;">${categories.pod}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: #d0c0ff;">Снюс:</span>
+                        <span style="color: #fff; font-weight: 600;">${categories.snus}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: #d0c0ff;">Расходники:</span>
+                        <span style="color: #fff; font-weight: 600;">${categories.other}</span>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+    } catch (error) {
+        console.error("Ошибка загрузки статистики:", error);
+        document.getElementById('statsContent').innerHTML = 
+            '<div style="text-align:center;padding:20px;color:#ff4d4d;">Ошибка загрузки статистики</div>';
+    }
+}
+
+// ====================== ДОБАВЛЕНИЕ ТОВАРА ======================
+async function addProduct() {
+    if (isOperationInProgress) return;
+    
+    const submitBtn = document.querySelector('#addModal .confirm-modal-btn');
+    const originalText = submitBtn.textContent;
+    
+    const name = document.getElementById('productName').value.trim();
+    const flavor = document.getElementById('productFlavor').value.trim();
+    const category = document.getElementById('productCategory').value;
+    const priceInput = document.getElementById('productPrice').value;
+    const discountInput = document.getElementById('productDiscount').value;
+    const discountType = document.getElementById('discountType').value;
+    const quantityInput = document.getElementById('productQuantity').value;
+    
+    if (!name) {
+        showNotification('Введите название товара', 'error');
+        return;
+    }
+    
+    if (!flavor) {
+        const placeholder = document.getElementById('productFlavor').placeholder;
+        showNotification(`Введите ${placeholder.toLowerCase()}`, 'error');
+        return;
+    }
+    
+    if (!category) {
+        showNotification('Выберите категорию', 'error');
+        return;
+    }
+    
+    let price = parseFloat(priceInput);
+    if (isNaN(price) || price < 0) {
+        showNotification('Введите корректную цену', 'error');
+        return;
+    }
+    
+    if (price > 10000) {
+        showNotification('Цена не может превышать 10 000 BYN', 'error');
+        return;
+    }
+    
+    let discount = parseFloat(discountInput) || 0;
+    if (discount < 0 || discount > 99) {
+        showNotification('Скидка должна быть от 0 до 99%', 'error');
+        return;
+    }
+    
+    if (discountType === 'fixed' && discount >= price) {
+        showNotification('Фиксированная скидка не может быть больше или равна цене', 'error');
+        return;
+    }
+    
+    let quantity = parseInt(quantityInput);
+    if (isNaN(quantity) || quantity < 0) {
+        showNotification('Введите корректное количество', 'error');
+        return;
+    }
+    
+    if (quantity > 10000) {
+        showNotification('Количество не может превышать 10 000', 'error');
+        return;
+    }
+    
+    isOperationInProgress = true;
+    submitBtn.textContent = 'Добавляем...';
+    submitBtn.disabled = true;
+    
+    const newProduct = {
+        name: name,
+        flavor: flavor,
+        category: category,
+        price: price.toFixed(2),
+        quantity: quantity,
+        createdAt: Date.now()
+    };
+    
+    if (discount > 0) {
+        newProduct.discount = discount;
+        newProduct.discountType = discountType;
+    }
+    
+    database.ref('products').push(newProduct)
+        .then(() => {
+            closeAddModal();
+            showNotification('✅ Товар успешно добавлен!', 'success');
+            filterProducts(currentFilter);
+        })
+        .catch((error) => {
+            console.error("Ошибка добавления:", error);
+            showNotification('❌ Ошибка добавления товара', 'error');
+        })
+        .finally(() => {
+            submitBtn.textContent = originalText;
+            submitBtn.disabled = false;
+            isOperationInProgress = false;
+        });
+}
+
+function closeAddModal() {
+    document.getElementById('overlay').style.display = 'none';
+    document.getElementById('addModal').style.display = 'none';
+    
+    ['productName', 'productFlavor', 'productPrice', 'productQuantity', 'productDiscount'].forEach(id => {
+        document.getElementById(id).value = '';
+    });
+    document.getElementById('productCategory').selectedIndex = 0;
+    document.getElementById('discountType').selectedIndex = 0;
+}
+
+function showAddModal() {
+    document.getElementById('overlay').style.display = 'block';
+    document.getElementById('addModal').style.display = 'block';
+    document.getElementById('adminPanel').style.display = 'none';
+    updateFlavorPlaceholder();
+}
+
+// ====================== ФИЛЬТРАЦИЯ ======================
+function filterProducts(category) {
+    currentFilter = category;
+    
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    event.target.classList.add('active');
+    
+    if (productsRef) {
+        productsRef.once('value').then((snapshot) => {
+            const products = snapshot.val();
+            if (products) {
+                const productsArray = Object.keys(products).map(productId => ({
+                    id: productId,
+                    ...products[productId]
+                }));
+                displayProducts(productsArray);
+            }
+        });
+    }
+}
+
+// ====================== РЕДАКТИРОВАНИЕ ======================
+function startEditMode() {
+    editMode = true;
+    deleteMode = false;
+    document.getElementById('adminPanel').style.display = 'none';
+    document.getElementById('exitEditBtn').style.display = 'block';
+    document.getElementById('exitDeleteBtn').style.display = 'none';
+    
+    enableEditMode();
+}
+
+function enableEditMode() {
+    document.querySelectorAll('.product-item').forEach(item => {
+        item.classList.remove('delete-mode');
+        item.classList.add('edit-mode');
+        item.onclick = function(e) {
+            if (isOperationInProgress) return;
+            if (e.target.classList.contains('buy-btn') || e.target.closest('.buy-btn')) return;
+            handleProductEdit(this);
+        };
+    });
+}
+
+function exitEditMode() {
+    editMode = false;
+    document.getElementById('exitEditBtn').style.display = 'none';
+    
+    document.querySelectorAll('.product-item').forEach(item => {
+        item.classList.remove('edit-mode');
+        item.onclick = null;
+    });
+}
+
+async function handleProductEdit(product) {
+    if (!editMode || isOperationInProgress) return;
+    
+    currentProductId = product.dataset.id;
+    
+    try {
+        const snapshot = await database.ref('products/' + currentProductId).once('value');
+        const productData = snapshot.val();
+        
+        if (!productData) return;
+        
+        document.getElementById('editProductName').value = productData.name || '';
+        document.getElementById('editProductFlavor').value = productData.flavor || '';
+        document.getElementById('editProductPrice').value = productData.price || '';
+        document.getElementById('editProductQuantity').value = productData.quantity || '';
+        document.getElementById('editProductDiscount').value = productData.discount || '';
+        
+        const categorySelect = document.getElementById('editProductCategory');
+        categorySelect.value = productData.category || 'other';
+        updateEditFlavorPlaceholder();
+        
+        const discountTypeSelect = document.getElementById('editDiscountType');
+        discountTypeSelect.value = productData.discountType || 'percent';
+        
+        document.getElementById('overlay').style.display = 'block';
+        document.getElementById('editModal').style.display = 'block';
+        
+    } catch (error) {
+        console.error("Ошибка загрузки товара:", error);
+        showNotification('❌ Ошибка загрузки товара', 'error');
+    }
+}
+
+async function saveProductEdit() {
+    if (isOperationInProgress) return;
+    
+    const submitBtn = document.querySelector('#editModal .confirm-modal-btn');
+    const originalText = submitBtn.textContent;
+    
+    const name = document.getElementById('editProductName').value.trim();
+    const flavor = document.getElementById('editProductFlavor').value.trim();
+    const category = document.getElementById('editProductCategory').value;
+    const priceInput = document.getElementById('editProductPrice').value;
+    const discountInput = document.getElementById('editProductDiscount').value;
+    const discountType = document.getElementById('editDiscountType').value;
+    const quantityInput = document.getElementById('editProductQuantity').value;
+    
+    if (!name) {
+        showNotification('Введите название товара', 'error');
+        return;
+    }
+    
+    if (!flavor) {
+        const placeholder = document.getElementById('editProductFlavor').placeholder;
+        showNotification(`Введите ${placeholder.toLowerCase()}`, 'error');
+        return;
+    }
+    
+    let price = parseFloat(priceInput);
+    if (isNaN(price) || price < 0) {
+        showNotification('Введите корректную цену', 'error');
+        return;
+    }
+    
+    if (price > 10000) {
+        showNotification('Цена не может превышать 10 000 BYN', 'error');
+        return;
+    }
+    
+    let discount = parseFloat(discountInput) || 0;
+    if (discount < 0 || discount > 99) {
+        showNotification('Скидка должна быть от 0 до 99%', 'error');
+        return;
+    }
+    
+    if (discountType === 'fixed' && discount >= price) {
+        showNotification('Фиксированная скидка не может быть больше или равна цене', 'error');
+        return;
+    }
+    
+    let quantity = parseInt(quantityInput);
+    if (isNaN(quantity) || quantity < 0) {
+        showNotification('Введите корректное количество', 'error');
+        return;
+    }
+    
+    if (quantity > 10000) {
+        showNotification('Количество не может превышать 10 000', 'error');
+        return;
+    }
+    
+    isOperationInProgress = true;
+    submitBtn.textContent = 'Сохранение...';
+    submitBtn.disabled = true;
+    
+    const updatedProduct = {
+        name: name,
+        flavor: flavor,
+        category: category,
+        price: price.toFixed(2),
+        quantity: quantity,
+        updatedAt: Date.now()
+    };
+    
+    if (discount > 0) {
+        updatedProduct.discount = discount;
+        updatedProduct.discountType = discountType;
+    } else {
+        updatedProduct.discount = null;
+        updatedProduct.discountType = null;
+    }
+    
+    database.ref('products/' + currentProductId).update(updatedProduct)
+        .then(() => {
+            closeEditModal();
+            showNotification('✅ Товар успешно обновлен!', 'success');
+        })
+        .catch((error) => {
+            console.error("Ошибка обновления:", error);
+            showNotification('❌ Ошибка обновления товара', 'error');
+        })
+        .finally(() => {
+            submitBtn.textContent = originalText;
+            submitBtn.disabled = false;
+            isOperationInProgress = false;
+        });
+}
+
+function closeEditModal() {
+    document.getElementById('overlay').style.display = 'none';
+    document.getElementById('editModal').style.display = 'none';
+    currentProductId = null;
+}
+
+// ====================== ПОКУПКА ======================
+async function showBuyModal(productId, category) {
+    try {
+        const snapshot = await database.ref('products/' + productId).once('value');
+        const product = snapshot.val();
+        
+        if (!product || product.quantity === 0) {
+            showNotification('⚠️ Товар временно отсутствует', 'warning');
+            return;
+        }
+        
+        const categoryNames = {
+            liquid: "Жидкость",
+            pod: "Под-система",
+            snus: "Снюс",
+            other: "Расходник"
+        };
+        
+        const categoryName = categoryNames[product.category] || 'Другое';
+        
+        let finalPrice = parseFloat(product.price || 0);
+        if (product.discount && product.discount > 0) {
+            if (product.discountType === 'percent') {
+                finalPrice = finalPrice * (1 - product.discount / 100);
+            } else if (product.discountType === 'fixed') {
+                finalPrice = finalPrice - product.discount;
+            }
+            finalPrice = Math.max(0, finalPrice);
+        }
+        
+        orderText = `📦 Заказ:\n\n` +
+                   `Товар: ${product.name}\n` +
+                   `Категория: ${categoryName}\n`;
+        
+        if (product.category === 'pod') {
+            orderText += `Бренд: ${product.flavor}\n`;
+        } else if (product.category === 'other') {
+            orderText += `Тип: ${product.flavor}\n`;
+        } else {
+            orderText += `Вкус: ${product.flavor}\n`;
+        }
+        
+        if (product.discount && product.discount > 0) {
+            orderText += `Цена: ${finalPrice.toFixed(2)} BYN (скидка ${product.discount}${product.discountType === 'percent' ? '%' : ' BYN'})\n`;
+        } else {
+            orderText += `Цена: ${finalPrice.toFixed(2)} BYN\n`;
+        }
+        
+        document.getElementById('overlay').style.display = 'block';
+        document.getElementById('buyModal').style.display = 'block';
+        document.getElementById('orderText').textContent = orderText;
+        
+        const orderBlock = document.getElementById('orderTextBlock');
+        orderBlock.onclick = function() {
+            if (!navigator.clipboard) {
+                const textArea = document.createElement('textarea');
+                textArea.value = orderText;
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    showNotification('✅ Текст заказа скопирован!', 'success');
+                } catch (err) {
+                    showNotification('❌ Ошибка копирования', 'error');
+                }
+                document.body.removeChild(textArea);
+                return;
+            }
+            
+            navigator.clipboard.writeText(orderText).then(() => {
+                this.style.background = 'linear-gradient(135deg, rgba(76, 175, 80, 0.2), rgba(46, 125, 50, 0.2))';
+                this.style.borderColor = '#4CAF50';
+                this.querySelector('.order-text').style.color = '#9dff9d';
+                
+                setTimeout(() => {
+                    this.style.background = '';
+                    this.style.borderColor = '';
+                    this.querySelector('.order-text').style.color = '';
+                }, 1500);
+                
+                showNotification('✅ Текст заказа скопирован!', 'success');
+            }).catch(err => {
+                showNotification('❌ Ошибка копирования', 'error');
+            });
+        };
+        
+    } catch (error) {
+        console.error("Ошибка:", error);
+        showNotification('❌ Ошибка загрузки товара', 'error');
+    }
+}
+
+function closeBuyModal() {
+    document.getElementById('overlay').style.display = 'none';
+    document.getElementById('buyModal').style.display = 'none';
+}
+
+// ====================== УДАЛЕНИЕ ======================
+function startDeleteMode() {
+    deleteMode = true;
+    editMode = false;
+    document.getElementById('adminPanel').style.display = 'none';
+    document.getElementById('exitDeleteBtn').style.display = 'block';
+    document.getElementById('exitEditBtn').style.display = 'none';
+    
+    enableDeleteMode();
+}
+
+function enableDeleteMode() {
+    document.querySelectorAll('.product-item').forEach(item => {
+        item.classList.remove('edit-mode');
+        item.classList.add('delete-mode');
+        item.onclick = function(e) {
+            if (isOperationInProgress) return;
+            if (e.target.classList.contains('buy-btn') || e.target.closest('.buy-btn')) return;
+            handleProductDeletion(this);
+        };
+    });
+}
+
+function exitDeleteMode() {
+    deleteMode = false;
+    document.getElementById('exitDeleteBtn').style.display = 'none';
+    
+    document.querySelectorAll('.product-item').forEach(item => {
+        item.classList.remove('delete-mode');
+        item.onclick = null;
+    });
+}
+
+async function handleProductDeletion(product) {
+    if (!deleteMode || isOperationInProgress) return;
+    
+    productToDelete = product;
+    currentProductId = product.dataset.id;
+    
+    const snapshot = await database.ref('products/' + currentProductId).once('value');
+    const productData = snapshot.val();
+    
+    if (!productData) return;
+    
+    const name = productData.name || 'Без названия';
+    const flavor = productData.flavor || '';
+    
+    document.getElementById('overlay').style.display = 'block';
+    document.getElementById('deleteModal').style.display = 'block';
+    document.getElementById('deleteProductInfo').innerHTML = 
+        `Удалить товар?<br><br><strong style="color:#fff;">${name}</strong><br>${flavor}`;
+}
+
+function cancelDelete() {
+    closeDeleteModal();
+}
+
+async function confirmDelete() {
+    if (!currentProductId || isOperationInProgress) return;
+    
+    const submitBtn = document.querySelector('#deleteModal .confirm-modal-btn');
+    const originalText = submitBtn.textContent;
+    
+    submitBtn.textContent = 'Удаление...';
+    submitBtn.disabled = true;
+    isOperationInProgress = true;
+    
+    try {
+        await database.ref('products/' + currentProductId).remove();
+        
+        closeDeleteModal();
+        showNotification('✅ Товар успешно удален!', 'success');
+    } catch (error) {
+        console.error("Ошибка удаления:", error);
+        showNotification('❌ Ошибка удаления товара', 'error');
+    } finally {
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+        isOperationInProgress = false;
+    }
+}
+
+function closeDeleteModal() {
+    document.getElementById('overlay').style.display = 'none';
+    document.getElementById('deleteModal').style.display = 'none';
+    productToDelete = null;
+    currentProductId = null;
+}
+
+function closeAllModals() {
+    document.getElementById('overlay').style.display = 'none';
+    document.getElementById('addModal').style.display = 'none';
+    document.getElementById('editModal').style.display = 'none';
+    document.getElementById('deleteModal').style.display = 'none';
+    document.getElementById('buyModal').style.display = 'none';
+    document.getElementById('loginForm').style.display = 'none';
+    document.getElementById('statsModal').style.display = 'none';
+    document.getElementById('backupModal').style.display = 'none';
+    document.getElementById('backupMenuModal').style.display = 'none';
+    productToDelete = null;
+    currentProductId = null;
+}
+
+// ====================== РЕЗЕРВНОЕ КОПИРОВАНИЕ ======================
+async function createBackup() {
+    try {
+        const snapshot = await database.ref('products').once('value');
+        const products = snapshot.val();
+        
+        if (!products) return null;
+        
+        const backupData = {
+            timestamp: Date.now(),
+            date: new Date().toISOString(),
+            count: Object.keys(products).length,
+            data: products
+        };
+        
+        // Сохраняем в локальное хранилище (последние 5 копий)
+        const backups = JSON.parse(localStorage.getItem('smoke_backups') || '[]');
+        backups.unshift(backupData);
+        
+        // Ограничиваем количество сохраненных копий
+        if (backups.length > 5) {
+            backups.pop();
+        }
+        
+        localStorage.setItem('smoke_backups', JSON.stringify(backups));
+        
+        console.log('✅ Резервная копия создана:', backupData.count, 'товаров');
+        return backupData;
+        
+    } catch (error) {
+        console.error('Ошибка создания резервной копии:', error);
+        return null;
+    }
+}
+
+// ====================== ЭКСПОРТ ТОВАРОВ ======================
+async function exportProducts() {
+    try {
+        const snapshot = await database.ref('products').once('value');
+        const products = snapshot.val();
+        
+        if (!products) {
+            showNotification('❌ Нет товаров для экспорта', 'error');
+            return;
+        }
+        
+        // Создаем структуру для экспорта
+        const exportData = {
+            metadata: {
+                version: '1.0',
+                exportDate: new Date().toISOString(),
+                totalProducts: Object.keys(products).length,
+                shopName: 'SMOKE магазин'
+            },
+            products: products
+        };
+        
+        const dataStr = JSON.stringify(exportData, null, 2);
+        const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+        
+        const exportFileDefaultName = `smoke-shop-backup-${new Date().toISOString().split('T')[0]}.json`;
+        
+        const linkElement = document.createElement('a');
+        linkElement.setAttribute('href', dataUri);
+        linkElement.setAttribute('download', exportFileDefaultName);
+        linkElement.click();
+        
+        showNotification(`✅ Экспортировано ${Object.keys(products).length} товаров`, 'success', 3000);
+        
+    } catch (error) {
+        console.error("Ошибка экспорта:", error);
+        showNotification('❌ Ошибка экспорта товаров', 'error');
+    }
+}
+
+// ====================== ИМПОРТ ТОВАРОВ ======================
+function importProducts() {
+    // Создаем скрытый input для выбора файла
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = '.json';
+    fileInput.style.display = 'none';
+    
+    fileInput.onchange = async (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        
+        reader.onload = async (e) => {
+            try {
+                const content = e.target.result;
+                const importData = JSON.parse(content);
+                
+                // Проверяем структуру файла
+                if (!importData.products) {
+                    showNotification('❌ Неверный формат файла импорта', 'error');
+                    return;
+                }
+                
+                // Показываем подтверждение
+                const productCount = Object.keys(importData.products).length;
+                
+                if (!confirm(`Импортировать ${productCount} товаров?\n\n⚠️ Внимание: существующие товары будут перезаписаны!`)) {
+                    return;
+                }
+                
+                showNotification(`⏳ Импорт ${productCount} товаров...`, 'info', 5000);
+                
+                // Импортируем каждый товар
+                let importedCount = 0;
+                let errorCount = 0;
+                
+                for (const [productId, productData] of Object.entries(importData.products)) {
+                    try {
+                        // Проверяем обязательные поля
+                        if (!productData.name || !productData.category || !productData.price) {
+                            console.warn('Пропущен товар без обязательных полей:', productId);
+                            errorCount++;
+                            continue;
+                        }
+                        
+                        // Добавляем дату импорта
+                        productData.importedAt = Date.now();
+                        
+                        // Сохраняем в Firebase
+                        await database.ref('products/' + productId).set(productData);
+                        importedCount++;
+                        
+                    } catch (error) {
+                        console.error('Ошибка импорта товара:', productId, error);
+                        errorCount++;
+                    }
+                }
+                
+                showNotification(`✅ Импорт завершен!\nУспешно: ${importedCount}, Ошибок: ${errorCount}`, 'success', 5000);
+                
+                // Перезагружаем товары
+                filterProducts(currentFilter);
+                
+            } catch (error) {
+                console.error("Ошибка парсинга файла:", error);
+                showNotification('❌ Ошибка чтения файла импорта', 'error');
+            }
+        };
+        
+        reader.onerror = () => {
+            showNotification('❌ Ошибка чтения файла', 'error');
+        };
+        
+        reader.readAsText(file);
+    };
+    
+    document.body.appendChild(fileInput);
+    fileInput.click();
+    document.body.removeChild(fileInput);
+}
+
+// ====================== УПРАВЛЕНИЕ РЕЗЕРВНЫМИ КОПИЯМИ ======================
+function showBackupMenu() {
+    document.getElementById('overlay').style.display = 'block';
+    document.getElementById('backupMenuModal').style.display = 'block';
+    document.getElementById('adminPanel').style.display = 'none';
+}
+
+function closeBackupMenu() {
+    document.getElementById('overlay').style.display = 'none';
+    document.getElementById('backupMenuModal').style.display = 'none';
+}
+
+function showBackupManager() {
+    document.getElementById('overlay').style.display = 'block';
+    document.getElementById('backupModal').style.display = 'block';
+    document.getElementById('backupMenuModal').style.display = 'none';
+    loadBackupList();
+}
+
+function closeBackupModal() {
+    document.getElementById('overlay').style.display = 'none';
+    document.getElementById('backupModal').style.display = 'none';
+}
+
+function loadBackupList() {
+    const backups = JSON.parse(localStorage.getItem('smoke_backups') || '[]');
+    const backupList = document.getElementById('backupList');
+    
+    if (backups.length === 0) {
+        backupList.innerHTML = `
+            <div style="text-align:center;color:#aaa;padding:20px;">
+                Резервные копии не найдены
+            </div>
+        `;
+        return;
+    }
+    
+    let html = '';
+    backups.forEach((backup, index) => {
+        const date = new Date(backup.timestamp);
+        const formattedDate = date.toLocaleString('ru-RU');
+        
+        html += `
+            <div style="
+                background: rgba(20,15,45,0.6);
+                border-radius: 8px;
+                padding: 12px;
+                margin-bottom: 10px;
+                border: 1px solid rgba(157,78,221,0.2);
+            ">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                    <div style="font-weight:600;color:#fff;">Копия #${index + 1}</div>
+                    <div style="font-size:0.8rem;color:#9d4edd;">${backup.count} товаров</div>
+                </div>
+                <div style="font-size:0.8rem;color:#d0c0ff;margin-bottom:8px;text-align:center;">
+                    ${formattedDate}
+                </div>
+                <div style="display:flex;gap:8px;">
+                    <button onclick="restoreBackup(${index})" style="
+                        flex:1;
+                        padding: 8px;
+                        background: linear-gradient(45deg, #00b4db, #0083b0);
+                        border: none;
+                        border-radius: 6px;
+                        color: white;
+                        font-size: 0.85rem;
+                        cursor: pointer;
+                    ">Восстановить</button>
+                    <button onclick="exportBackup(${index})" style="
+                        flex:1;
+                        padding: 8px;
+                        background: linear-gradient(45deg, #38ef7d, #11998e);
+                        border: none;
+                        border-radius: 6px;
+                        color: white;
+                        font-size: 0.85rem;
+                        cursor: pointer;
+                    ">Экспорт</button>
+                </div>
+            </div>
+        `;
+    });
+    
+    backupList.innerHTML = html;
+}
+
+async function createManualBackup() {
+    const backup = await createBackup();
+    if (backup) {
+        showNotification(`✅ Резервная копия создана (${backup.count} товаров)`, 'success');
+        loadBackupList();
+    }
+}
+
+async function restoreBackup(index) {
+    const backups = JSON.parse(localStorage.getItem('smoke_backups') || '[]');
+    if (!backups[index]) return;
+    
+    const backup = backups[index];
+    
+    if (!confirm(`Восстановить резервную копию от ${new Date(backup.timestamp).toLocaleString()}?\n\nЭто перезапишет ВСЕ текущие товары!`)) {
+        return;
+    }
+    
+    try {
+        // Очищаем все текущие товары
+        await database.ref('products').remove();
+        
+        // Восстанавливаем из резервной копии
+        for (const [productId, productData] of Object.entries(backup.data)) {
+            await database.ref('products/' + productId).set(productData);
+        }
+        
+        showNotification(`✅ Резервная копия восстановлена (${backup.count} товаров)`, 'success', 5000);
+        closeBackupModal();
+        closeBackupMenu();
+        filterProducts(currentFilter);
+        
+    } catch (error) {
+        console.error("Ошибка восстановления:", error);
+        showNotification('❌ Ошибка восстановления резервной копии', 'error');
+    }
+}
+
+function exportBackup(index) {
+    const backups = JSON.parse(localStorage.getItem('smoke_backups') || '[]');
+    if (!backups[index]) return;
+    
+    const backup = backups[index];
+    const dataStr = JSON.stringify(backup, null, 2);
+    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+    
+    const date = new Date(backup.timestamp);
+    const fileName = `smoke-restore-${date.toISOString().split('T')[0]}.json`;
+    
+    const linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', fileName);
+    linkElement.click();
+    
+    showNotification('✅ Резервная копия экспортирована', 'success');
+}
+
+// ====================== ЗАГРУЗКА ======================
+window.addEventListener('DOMContentLoaded', function() {
+    checkAuth();
+    loadProducts();
+    
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeAllModals();
+            document.getElementById('adminPanel').style.display = 'none';
+        }
+    });
+    
+    document.addEventListener('click', function(e) {
+        const adminPanel = document.getElementById('adminPanel');
+        const adminBtn = document.getElementById('adminBtn');
+        
+        if (adminPanel && adminPanel.style.display === 'block' && 
+            !adminPanel.contains(e.target) && 
+            !adminBtn.contains(e.target)) {
+            adminPanel.style.display = 'none';
+        }
+    });
+    
+    document.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+    });
+});
+
+window.addEventListener('beforeunload', () => {
+    if (productsRef) {
+        productsRef.off();
+    }
+});
+</script>
+</body>
+</html>
