@@ -265,7 +265,7 @@ body {
     display: flex;
     flex-direction: column;
     flex: 1;
-    gap: 6px; /* Уменьшен gap между элементами */
+    gap: 4px; /* Уменьшен gap между элементами (было 6px) */
 }
 
 /* КАТЕГОРИЯ УБРАНА ИЗ КАРТОЧКИ */
@@ -288,7 +288,7 @@ body {
     width: 100%;
     height: 1px;
     background: linear-gradient(90deg, transparent, rgba(157, 78, 221, 0.4), transparent);
-    margin: 4px 0 6px 0; /* Уменьшены отступы */
+    margin: 2px 0 3px 0; /* Уменьшены отступы (было 4px 0 6px) */
     border-radius: 1px;
 }
 
@@ -561,38 +561,40 @@ body {
     background: rgba(255, 255, 255, 0.2);
 }
 
-/* АДМИН ПАНЕЛЬ */
+/* АДМИН ПАНЕЛЬ - УМЕНЬШЕННАЯ ДЛЯ МОБИЛЬНЫХ */
 .admin-panel {
     position: fixed;
     top: 60px;
     right: 15px;
     background: rgba(20, 15, 45, 0.95);
     border-radius: 14px;
-    padding: 20px;
+    padding: 15px; /* Уменьшен padding (было 20px) */
     z-index: 1000;
     display: none;
     backdrop-filter: blur(25px);
     border: 1px solid rgba(157, 78, 221, 0.3);
     box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
     min-width: 250px;
+    max-height: 80vh; /* Ограничение высоты */
+    overflow-y: auto; /* Скролл если не влезает */
 }
 
 .admin-panel h3 {
     color: #fff;
-    margin: 0 0 15px 0;
-    font-size: 1.3rem;
+    margin: 0 0 12px 0; /* Уменьшен отступ (было 15px) */
+    font-size: 1.2rem; /* Уменьшен размер (было 1.3rem) */
     text-align: center;
     font-weight: 700;
 }
 
 .admin-btn, .logout-btn {
     width: 100%;
-    padding: 12px;
-    margin: 6px 0;
+    padding: 10px; /* Уменьшен padding (было 12px) */
+    margin: 4px 0; /* Уменьшен отступ (было 6px 0) */
     border: none;
     border-radius: 10px;
     font-weight: 700;
-    font-size: 0.9rem;
+    font-size: 0.85rem; /* Уменьшен размер (было 0.9rem) */
     cursor: pointer;
     transition: all 0.3s;
 }
@@ -627,7 +629,8 @@ body {
     background: rgba(255, 255, 255, 0.1);
     color: #fff;
     border: 2px solid rgba(157, 78, 221, 0.3);
-    margin-top: 12px;
+    margin-top: 10px; /* Уменьшен отступ (было 12px) */
+    font-size: 0.85rem; /* Уменьшен размер */
 }
 
 .logout-btn:hover {
@@ -1167,6 +1170,19 @@ body {
         top: 50px;
         right: 10px;
         min-width: 220px;
+        padding: 12px; /* Еще меньше padding на мобильных */
+        max-height: 70vh; /* Ограничение высоты */
+    }
+    
+    .admin-panel h3 {
+        font-size: 1.1rem; /* Уменьшен размер на мобильных */
+        margin-bottom: 10px;
+    }
+    
+    .admin-btn, .logout-btn {
+        padding: 9px; /* Уменьшен padding на мобильных */
+        margin: 3px 0; /* Уменьшен отступ */
+        font-size: 0.82rem; /* Уменьшен размер шрифта */
     }
     
     .filter-container {
@@ -1202,6 +1218,7 @@ body {
     
     .admin-panel {
         right: 15px;
+        max-height: 75vh; /* Ограничение высоты */
     }
 }
 
@@ -1626,7 +1643,15 @@ function previewAddPhoto(event) {
     
     const reader = new FileReader();
     reader.onload = function(e) {
-        previewContainer.innerHTML = `<img src="${e.target.result}" class="photo-preview" id="addPhotoPreview" style="transform: scale(${addZoomLevel})">`;
+        const img = document.createElement('img');
+        img.src = e.target.result;
+        img.className = 'photo-preview';
+        img.id = 'addPhotoPreview';
+        img.style.transform = `scale(${addZoomLevel})`;
+        
+        previewContainer.innerHTML = '';
+        previewContainer.appendChild(img);
+        
         zoomControls.style.display = 'flex';
         document.getElementById('addZoomValue').textContent = Math.round(addZoomLevel * 100) + '%';
     };
@@ -1663,14 +1688,22 @@ function previewEditPhoto(event) {
     
     const reader = new FileReader();
     reader.onload = function(e) {
-        previewContainer.innerHTML = `<img src="${e.target.result}" class="photo-preview" id="editPhotoPreview" style="transform: scale(${editZoomLevel})">`;
+        const img = document.createElement('img');
+        img.src = e.target.result;
+        img.className = 'photo-preview';
+        img.id = 'editPhotoPreview';
+        img.style.transform = `scale(${editZoomLevel})`;
+        
+        previewContainer.innerHTML = '';
+        previewContainer.appendChild(img);
+        
         zoomControls.style.display = 'flex';
         document.getElementById('editZoomValue').textContent = Math.round(editZoomLevel * 100) + '%';
     };
     reader.readAsDataURL(file);
 }
 
-// Функции масштабирования
+// Функции масштабирования - ИСПРАВЛЕННЫЕ
 function zoomIn(type) {
     if (type === 'add') {
         if (addZoomLevel < 3) {
@@ -2537,15 +2570,25 @@ async function handleProductEdit(product) {
         const discountTypeSelect = document.getElementById('editDiscountType');
         discountTypeSelect.value = productData.discountType || 'percent';
         
-        // Загрузка фото
+        // Загрузка фото - ИСПРАВЛЕННЫЙ КОД
         const photoPreviewContainer = document.getElementById('editPhotoPreviewContainer');
+        const zoomControls = document.getElementById('editZoomControls');
+        
         if (productData.photoUrl && productData.photoUrl !== '') {
-            photoPreviewContainer.innerHTML = `<img src="${productData.photoUrl}" class="photo-preview" id="editPhotoPreview" style="transform: scale(${editZoomLevel})">`;
-            document.getElementById('editZoomControls').style.display = 'flex';
+            const img = document.createElement('img');
+            img.src = productData.photoUrl;
+            img.className = 'photo-preview';
+            img.id = 'editPhotoPreview';
+            img.style.transform = `scale(${editZoomLevel})`;
+            
+            photoPreviewContainer.innerHTML = '';
+            photoPreviewContainer.appendChild(img);
+            
+            zoomControls.style.display = 'flex';
             document.getElementById('editZoomValue').textContent = Math.round(editZoomLevel * 100) + '%';
         } else {
             photoPreviewContainer.innerHTML = '<div class="photo-placeholder-icon">📷</div>';
-            document.getElementById('editZoomControls').style.display = 'none';
+            zoomControls.style.display = 'none';
         }
         
         currentEditPhotoFile = null;
