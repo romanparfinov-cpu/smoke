@@ -176,27 +176,27 @@ body {
 .products {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
-    padding: 15px 12px 80px;
+    gap: 12px; /* Уменьшил gap между карточками */
+    padding: 12px 12px 80px;
     max-width: 1400px;
     margin: 0 auto;
     box-sizing: border-box;
 }
 
-/* КОМПАКТНАЯ КАРТОЧКА ТОВАРА - БЕЗ ФОТОГРАФИЙ */
+/* КОМПАКТНАЯ КАРТОЧКА ТОВАРА - БЕЗ ФОТОГРАФИЙ (ЕЩЁ КОМПАКТНЕЕ) */
 .product-item {
     background: rgba(255, 255, 255, 0.05);
-    border-radius: 16px;
+    border-radius: 14px; /* Немного меньше радиус */
     border: 1px solid rgba(157, 78, 221, 0.3);
-    padding: 15px 12px;
+    padding: 12px 10px; /* Уменьшил padding */
     display: flex;
     flex-direction: column;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     overflow: hidden;
     backdrop-filter: blur(8px);
-    min-height: 260px; /* Еще более компактная без фото */
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    min-height: 180px; /* СУЩЕСТВЕННО меньше высота (было 260px) */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 .product-item::before {
@@ -210,44 +210,44 @@ body {
 }
 
 .product-item:hover {
-    transform: translateY(-5px);
+    transform: translateY(-3px); /* Меньше поднятие при hover */
     border-color: #9d4edd;
-    box-shadow: 0 12px 30px rgba(157, 78, 221, 0.25);
+    box-shadow: 0 8px 20px rgba(157, 78, 221, 0.25);
     background: rgba(255, 255, 255, 0.08);
 }
 
 .product-item.delete-mode {
     border: 2px solid #ffcc00;
-    box-shadow: 0 0 20px rgba(255, 204, 0, 0.6);
+    box-shadow: 0 0 15px rgba(255, 204, 0, 0.6);
     animation: pulse 2s infinite;
     cursor: pointer;
 }
 
 .product-item.edit-mode {
     border: 2px solid #00b4db;
-    box-shadow: 0 0 20px rgba(0, 180, 219, 0.6);
+    box-shadow: 0 0 15px rgba(0, 180, 219, 0.6);
     cursor: pointer;
 }
 
-/* КОНТЕНТ КАРТОЧКИ - КОМПАКТНЫЙ */
+/* КОНТЕНТ КАРТОЧКИ - СУПЕР КОМПАКТНЫЙ */
 .product-content {
     display: flex;
     flex-direction: column;
     flex: 1;
-    gap: 8px;
+    gap: 4px; /* Уменьшил gap между элементами (было 8px) */
 }
 
 .product-name {
-    font-size: 1.2rem;
+    font-size: 1rem; /* Немного уменьшил размер */
     font-weight: 800;
     line-height: 1.2;
-    min-height: 1.8em;
+    min-height: 1.6em; /* Уменьшил высоту */
     display: flex;
     align-items: center;
     justify-content: center;
     color: #fff;
     margin: 0;
-    padding: 0 5px;
+    padding: 0 3px; /* Уменьшил padding */
 }
 
 /* ДЕКОРАТИВНЫЙ РАЗДЕЛИТЕЛЬ */
@@ -255,60 +255,60 @@ body {
     width: 100%;
     height: 1px;
     background: linear-gradient(90deg, transparent, rgba(157, 78, 221, 0.4), transparent);
-    margin: 4px 0 8px 0;
+    margin: 2px 0 3px 0; /* Уменьшил отступы (было 4px 0 8px) */
     border-radius: 1px;
 }
 
 /* ВКУС/ОПИСАНИЕ БЕЗ РАМКИ */
 .product-flavor {
     color: #d0c0ff;
-    font-size: 1rem;
+    font-size: 0.9rem; /* Немного уменьшил */
     font-weight: 500;
-    line-height: 1.3;
+    line-height: 1.2; /* Уменьшил межстрочный интервал */
     margin: 0;
     padding: 0;
     flex: 1;
     background: none;
     border: none;
     box-shadow: none;
-    min-height: 1.5em;
+    min-height: 1.3em; /* Уменьшил минимальную высоту */
 }
 
 /* ЦЕНА */
 .product-price {
-    font-size: 1.4rem;
+    font-size: 1.2rem; /* Уменьшил размер */
     font-weight: 800;
     color: #9dff9d;
-    margin: 8px 0;
+    margin: 4px 0; /* Уменьшил отступы (было 8px 0) */
 }
 
 .discount-price {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
+    gap: 6px; /* Уменьшил gap */
     flex-wrap: wrap;
 }
 
 .original-price {
     text-decoration: line-through;
     color: #ff9999;
-    font-size: 1rem;
+    font-size: 0.9rem; /* Уменьшил */
     opacity: 0.7;
 }
 
 .discount-badge {
     background: linear-gradient(45deg, #ff3366, #ff4d8d);
     color: white;
-    padding: 3px 8px;
-    border-radius: 6px;
-    font-size: 0.8rem;
+    padding: 2px 6px; /* Уменьшил padding */
+    border-radius: 5px; /* Уменьшил радиус */
+    font-size: 0.75rem; /* Уменьшил */
     font-weight: 700;
 }
 
 .price-number::after {
     content: " BYN";
-    font-size: 0.8em;
+    font-size: 0.75em;
     opacity: 0.9;
     margin-left: 2px;
     font-weight: 600;
@@ -317,10 +317,10 @@ body {
 /* ОСТАТОК - БЕЛЫЙ, ЖИРНЫЙ, БЕЗ РАМКИ */
 .quantity-badge {
     padding: 0;
-    font-size: 0.9rem;
+    font-size: 0.8rem; /* Уменьшил размер */
     font-weight: 700;
     display: inline-block;
-    margin: 4px auto;
+    margin: 2px auto; /* Уменьшил отступы (было 4px auto) */
     width: fit-content;
     color: #fff;
     background: none;
@@ -333,18 +333,18 @@ body {
 
 /* КНОПКИ */
 .buy-btn {
-    padding: 12px 15px;
+    padding: 8px 12px; /* Уменьшил padding (было 12px 15px) */
     background: linear-gradient(45deg, #9d4edd, #6a00ff);
     border: none;
-    border-radius: 10px;
+    border-radius: 8px; /* Немного меньше радиус */
     color: white;
     font-weight: 700;
     cursor: pointer;
     width: 100%;
     box-sizing: border-box;
-    margin-top: 10px;
-    font-size: 0.95rem;
-    letter-spacing: 0.8px;
+    margin-top: 6px; /* Уменьшил отступ сверху (было 10px) */
+    font-size: 0.85rem; /* Уменьшил размер шрифта */
+    letter-spacing: 0.5px; /* Уменьшил межбуквенный интервал */
     transition: all 0.3s;
     position: relative;
     overflow: hidden;
@@ -366,8 +366,8 @@ body {
 }
 
 .buy-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(157, 78, 221, 0.4);
+    transform: translateY(-1px); /* Меньше поднятие при hover */
+    box-shadow: 0 3px 10px rgba(157, 78, 221, 0.4);
 }
 
 .buy-btn:active {
@@ -539,7 +539,7 @@ body {
     backdrop-filter: blur(25px);
     border: 1px solid rgba(157, 78, 221, 0.3);
     box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
-    min-width: 250px;
+    min-width: 220px; /* Уменьшил ширину */
     max-height: 80vh;
     overflow-y: auto;
 }
@@ -606,9 +606,9 @@ body {
     transform: translate(-50%, -50%);
     background: rgba(20, 15, 45, 0.95);
     border-radius: 20px;
-    padding: 30px 25px;
+    padding: 25px 20px; /* Уменьшил padding */
     z-index: 2000;
-    width: min(400px, 90vw);
+    width: min(380px, 90vw); /* Немного уменьшил ширину */
     display: none;
     backdrop-filter: blur(25px);
     border: 1px solid rgba(157, 78, 221, 0.3);
@@ -617,26 +617,26 @@ body {
 
 .add-modal h3, .edit-modal h3, .stats-modal h3 {
     color: #fff;
-    font-size: 1.6rem;
-    margin: 0 0 25px 0;
+    font-size: 1.5rem; /* Уменьшил размер заголовка */
+    margin: 0 0 20px 0; /* Уменьшил отступ снизу */
     text-align: center;
     font-weight: 700;
 }
 
 .modal-input-container {
     position: relative;
-    margin-bottom: 15px;
+    margin-bottom: 12px; /* Уменьшил отступ между полями */
 }
 
 .modal-input-container input,
 .modal-input-container select {
     width: 100%;
-    padding: 13px 18px;
+    padding: 12px 16px; /* Уменьшил padding */
     background: rgba(255, 255, 255, 0.08);
     border: 2px solid rgba(157, 78, 221, 0.3);
     border-radius: 10px;
     color: #fff;
-    font-size: 0.95rem;
+    font-size: 0.9rem; /* Уменьшил размер шрифта */
     transition: all 0.3s;
     box-sizing: border-box;
 }
@@ -645,7 +645,7 @@ body {
     appearance: none;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' fill='%239d4edd' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
-    background-position: right 18px center;
+    background-position: right 16px center;
     background-size: 10px;
 }
 
@@ -654,7 +654,7 @@ body {
     outline: none;
     border-color: #9d4edd;
     background: rgba(255, 255, 255, 0.12);
-    box-shadow: 0 0 15px rgba(157, 78, 221, 0.3);
+    box-shadow: 0 0 12px rgba(157, 78, 221, 0.3); /* Уменьшил тень */
 }
 
 .modal-input-container select option {
@@ -662,20 +662,19 @@ body {
     color: #fff;
 }
 
+/* Поле скидки (только в BYN) */
 .discount-container {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 10px;
-    margin-bottom: 15px;
+    margin-bottom: 12px;
 }
 
 .discount-input {
-    padding: 13px 18px;
+    width: 100%;
+    padding: 12px 16px;
     background: rgba(255, 255, 255, 0.08);
     border: 2px solid rgba(157, 78, 221, 0.3);
     border-radius: 10px;
     color: #fff;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     transition: all 0.3s;
     box-sizing: border-box;
 }
@@ -684,22 +683,26 @@ body {
     outline: none;
     border-color: #9d4edd;
     background: rgba(255, 255, 255, 0.12);
-    box-shadow: 0 0 15px rgba(157, 78, 221, 0.3);
+    box-shadow: 0 0 12px rgba(157, 78, 221, 0.3);
+}
+
+.discount-input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
 }
 
 .modal-buttons {
     display: flex;
-    gap: 12px;
-    margin-top: 10px;
+    gap: 10px; /* Уменьшил gap */
+    margin-top: 8px; /* Уменьшил отступ сверху */
 }
 
 .confirm-modal-btn, .cancel-modal-btn {
     flex: 1;
-    padding: 13px;
+    padding: 12px; /* Уменьшил padding */
     border: none;
     border-radius: 10px;
     font-weight: 700;
-    font-size: 0.95rem;
+    font-size: 0.9rem; /* Уменьшил размер шрифта */
     cursor: pointer;
     transition: all 0.3s;
 }
@@ -711,7 +714,7 @@ body {
 
 .confirm-modal-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(157, 78, 221, 0.4);
+    box-shadow: 0 4px 12px rgba(157, 78, 221, 0.4); /* Уменьшил тень */
 }
 
 .cancel-modal-btn {
@@ -732,21 +735,21 @@ body {
     transform: translate(-50%, -50%);
     background: rgba(20, 15, 45, 0.98);
     border-radius: 20px;
-    padding: 30px 25px;
+    padding: 25px 20px; /* Уменьшил padding */
     z-index: 2000;
-    width: min(380px, 90vw);
+    width: min(350px, 90vw); /* Уменьшил ширину */
     display: none;
     backdrop-filter: blur(30px);
     border: 1px solid rgba(157, 78, 221, 0.4);
     box-shadow: 
-        0 25px 50px rgba(0, 0, 0, 0.6),
+        0 20px 40px rgba(0, 0, 0, 0.6), /* Уменьшил тень */
         inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .buy-modal h3 {
     color: #fff;
-    font-size: 1.5rem;
-    margin: 0 0 15px 0;
+    font-size: 1.4rem; /* Уменьшил размер */
+    margin: 0 0 12px 0; /* Уменьшил отступ */
     text-align: center;
     font-weight: 700;
 }
@@ -754,9 +757,9 @@ body {
 .order-text-block {
     background: linear-gradient(135deg, rgba(157, 78, 221, 0.1), rgba(106, 0, 255, 0.1));
     border: 2px solid rgba(157, 78, 221, 0.3);
-    border-radius: 14px;
-    padding: 20px;
-    margin: 15px 0 20px;
+    border-radius: 12px; /* Уменьшил радиус */
+    padding: 16px; /* Уменьшил padding */
+    margin: 12px 0 16px; /* Уменьшил отступы */
     text-align: left;
     cursor: pointer;
     transition: all 0.3s;
@@ -783,8 +786,8 @@ body {
 .order-text {
     font-family: 'Courier New', monospace;
     color: #d0c0ff;
-    font-size: 0.9rem;
-    line-height: 1.5;
+    font-size: 0.85rem; /* Уменьшил размер */
+    line-height: 1.4; /* Уменьшил межстрочный интервал */
     white-space: pre-wrap;
     margin: 0;
 }
@@ -792,29 +795,29 @@ body {
 .telegram-info {
     background: linear-gradient(135deg, rgba(0, 136, 204, 0.1), rgba(157, 78, 221, 0.1));
     border: 2px solid rgba(0, 136, 204, 0.3);
-    border-radius: 14px;
-    padding: 18px;
-    margin-bottom: 20px;
+    border-radius: 12px; /* Уменьшил радиус */
+    padding: 15px; /* Уменьшил padding */
+    margin-bottom: 16px; /* Уменьшил отступ */
     text-align: left;
 }
 
 .telegram-info a {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px; /* Уменьшил gap */
     text-decoration: none;
     color: inherit;
 }
 
 .telegram-icon {
-    width: 45px;
-    height: 45px;
+    width: 40px; /* Уменьшил размер */
+    height: 40px;
     background: linear-gradient(45deg, #0088cc, #00aced);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 22px;
+    font-size: 20px; /* Уменьшил размер иконки */
     flex-shrink: 0;
 }
 
@@ -824,34 +827,43 @@ body {
 
 .telegram-title {
     font-weight: 700;
-    font-size: 1rem;
-    margin-bottom: 3px;
+    font-size: 0.95rem; /* Уменьшил размер */
+    margin-bottom: 2px; /* Уменьшил отступ */
     color: #fff;
 }
 
 .telegram-subtitle {
     color: #66ccff;
-    font-size: 0.85rem;
+    font-size: 0.8rem; /* Уменьшил размер */
     opacity: 0.9;
 }
 
 .close-buy-btn {
     width: 100%;
-    padding: 14px;
+    padding: 12px; /* Уменьшил padding */
     background: linear-gradient(45deg, #9d4edd, #6a00ff);
     border: none;
     border-radius: 10px;
     color: white;
     font-weight: 700;
-    font-size: 0.95rem;
+    font-size: 0.9rem; /* Уменьшил размер */
     cursor: pointer;
     transition: all 0.3s;
-    letter-spacing: 0.8px;
+    letter-spacing: 0.6px; /* Уменьшил межбуквенный интервал */
 }
 
 .close-buy-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(157, 78, 221, 0.4);
+    box-shadow: 0 4px 12px rgba(157, 78, 221, 0.4); /* Уменьшил тень */
+}
+
+.copy-info {
+    text-align: center;
+    margin-top: 6px; /* Уменьшил отступ */
+    color: #66ccff;
+    font-size: 0.75rem; /* Уменьшил размер */
+    font-style: italic;
+    opacity: 0.8;
 }
 
 /* ОВЕРЛЕЙ */
@@ -870,10 +882,10 @@ body {
 /* КНОПКИ ВЫХОДА ИЗ РЕЖИМОВ */
 .exit-delete-btn {
     position: fixed;
-    bottom: 25px;
+    bottom: 20px; /* Поднял ближе к контенту */
     left: 50%;
     transform: translateX(-50%);
-    padding: 12px 30px;
+    padding: 10px 24px; /* Уменьшил padding */
     background: linear-gradient(45deg, #ff4d4d, #d43f3f);
     border: none;
     border-radius: 50px;
@@ -882,18 +894,18 @@ body {
     cursor: pointer;
     z-index: 1000;
     display: none;
-    font-size: 0.95rem;
-    letter-spacing: 0.8px;
-    box-shadow: 0 4px 15px rgba(255, 77, 77, 0.4);
+    font-size: 0.9rem; /* Уменьшил размер */
+    letter-spacing: 0.6px; /* Уменьшил межбуквенный интервал */
+    box-shadow: 0 3px 12px rgba(255, 77, 77, 0.4); /* Уменьшил тень */
     transition: all 0.3s;
 }
 
 .exit-edit-btn {
     position: fixed;
-    bottom: 25px;
+    bottom: 20px;
     left: 50%;
     transform: translateX(-50%);
-    padding: 12px 30px;
+    padding: 10px 24px;
     background: linear-gradient(45deg, #00b4db, #0083b0);
     border: none;
     border-radius: 50px;
@@ -902,24 +914,15 @@ body {
     cursor: pointer;
     z-index: 1000;
     display: none;
-    font-size: 0.95rem;
-    letter-spacing: 0.8px;
-    box-shadow: 0 4px 15px rgba(0, 180, 219, 0.4);
+    font-size: 0.9rem;
+    letter-spacing: 0.6px;
+    box-shadow: 0 3px 12px rgba(0, 180, 219, 0.4);
     transition: all 0.3s;
 }
 
 .exit-delete-btn:hover, .exit-edit-btn:hover {
     transform: translateX(-50%) translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
-}
-
-.copy-info {
-    text-align: center;
-    margin-top: 8px;
-    color: #66ccff;
-    font-size: 0.8rem;
-    font-style: italic;
-    opacity: 0.8;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4); /* Уменьшил тень */
 }
 
 /* МОДАЛЬНОЕ ОКНО СТАТИСТИКИ */
@@ -930,32 +933,18 @@ body {
     transform: translate(-50%, -50%);
     background: rgba(20, 15, 45, 0.98);
     border-radius: 20px;
-    padding: 25px;
+    padding: 20px; /* Уменьшил padding */
     z-index: 2000;
-    width: min(400px, 90vw);
+    width: min(350px, 90vw); /* Уменьшил ширину */
     display: none;
     backdrop-filter: blur(30px);
     border: 1px solid rgba(157, 78, 221, 0.4);
-    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6); /* Уменьшил тень */
 }
 
-/* МОДАЛЬНОЕ ОКНО УПРАВЛЕНИЯ РЕЗЕРВНЫМИ КОПИЯМИ */
-.backup-modal, .backup-menu-modal {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: rgba(20, 15, 45, 0.98);
-    border-radius: 20px;
-    padding: 25px;
-    z-index: 2000;
-    width: min(500px, 90vw);
-    max-height: 80vh;
-    display: none;
-    backdrop-filter: blur(30px);
-    border: 1px solid rgba(157, 78, 221, 0.4);
-    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6);
-    overflow-y: auto;
+/* МОДАЛЬНОЕ ОКНО УДАЛЕНИЯ */
+.add-modal.delete-modal {
+    width: min(320px, 90vw); /* Уменьшил ширину */
 }
 
 /* АДАПТИВНОСТЬ */
@@ -975,22 +964,36 @@ body {
     
     .products {
         grid-template-columns: repeat(2, 1fr);
-        gap: 10px;
-        padding: 12px 10px 70px;
+        gap: 8px; /* Ещё меньше gap на мобильных */
+        padding: 10px 8px 70px;
     }
     
     .product-item {
-        min-height: 240px;
-        padding: 12px 10px;
+        min-height: 160px; /* Ещё компактнее на мобильных */
+        padding: 10px 8px; /* Меньше padding */
+        border-radius: 12px; /* Меньше радиус */
     }
     
     .product-name {
-        font-size: 1.1rem;
-        min-height: 1.6em;
+        font-size: 0.95rem; /* Ещё меньше на мобильных */
+        min-height: 1.4em;
     }
     
     .product-flavor {
-        font-size: 0.9rem;
+        font-size: 0.85rem;
+        line-height: 1.1;
+    }
+    
+    .product-price {
+        font-size: 1.1rem;
+        margin: 3px 0;
+    }
+    
+    .buy-btn {
+        padding: 7px 10px;
+        font-size: 0.8rem;
+        margin-top: 4px;
+        border-radius: 6px;
     }
     
     .login-btn-main, .admin-btn-main {
@@ -1005,7 +1008,7 @@ body {
     .admin-panel {
         top: 50px;
         right: 10px;
-        min-width: 220px;
+        min-width: 200px; /* Уже на мобильных */
         padding: 12px;
         max-height: 70vh;
     }
@@ -1016,35 +1019,45 @@ body {
     }
     
     .admin-btn, .logout-btn {
-        padding: 9px;
+        padding: 8px; /* Меньше padding */
         margin: 3px 0;
-        font-size: 0.82rem;
+        font-size: 0.8rem; /* Меньше размер шрифта */
     }
     
     .filter-container {
-        gap: 6px;
-        padding: 0 10px 12px;
+        gap: 5px;
+        padding: 0 8px 10px;
     }
     
     .filter-btn {
-        padding: 7px 14px;
-        font-size: 0.8rem;
-        min-width: 80px;
+        padding: 6px 12px;
+        font-size: 0.78rem;
+        min-width: 75px;
     }
     
-    .login-form, .add-modal, .edit-modal, .buy-modal, .stats-modal, .backup-modal, .backup-menu-modal {
-        padding: 25px 20px;
+    .login-form, .add-modal, .edit-modal, .buy-modal, .stats-modal {
+        padding: 20px 15px; /* Меньше padding */
+    }
+    
+    .exit-delete-btn, .exit-edit-btn {
+        padding: 8px 20px;
+        font-size: 0.85rem;
+        bottom: 15px;
     }
 }
 
 @media (min-width: 481px) and (max-width: 768px) {
     .products {
         grid-template-columns: repeat(2, 1fr);
-        gap: 14px;
+        gap: 10px;
+    }
+    
+    .product-item {
+        min-height: 170px;
     }
     
     .admin-panel {
-        right: 15px;
+        right: 10px;
         max-height: 75vh;
     }
 }
@@ -1052,35 +1065,35 @@ body {
 @media (min-width: 769px) {
     .products {
         grid-template-columns: repeat(3, 1fr);
-        gap: 20px;
-        padding: 20px 15px 90px;
+        gap: 15px; /* Уменьшил gap на десктопе */
+        padding: 15px 12px 90px;
     }
     
     .product-item {
-        min-height: 280px;
+        min-height: 190px; /* Компактная высота на десктопе */
     }
     
     .admin-panel {
-        right: 20px;
+        right: 15px;
     }
 }
 
 @media (min-width: 1200px) {
     .products {
         grid-template-columns: repeat(4, 1fr);
-        gap: 24px;
-        padding: 25px 20px 100px;
+        gap: 18px; /* Уменьшил gap */
+        padding: 18px 15px 100px;
     }
     
     .product-item {
-        min-height: 300px;
+        min-height: 200px; /* Компактная высота на больших экранах */
     }
 }
 
 @keyframes pulse {
-    0% { box-shadow: 0 0 15px rgba(255, 204, 0, 0.5); }
-    50% { box-shadow: 0 0 25px rgba(255, 204, 0, 0.9); }
-    100% { box-shadow: 0 0 15px rgba(255, 204, 0, 0.5); }
+    0% { box-shadow: 0 0 10px rgba(255, 204, 0, 0.5); }
+    50% { box-shadow: 0 0 20px rgba(255, 204, 0, 0.9); }
+    100% { box-shadow: 0 0 10px rgba(255, 204, 0, 0.5); }
 }
 </style>
 </head>
@@ -1116,9 +1129,6 @@ body {
     <button class="admin-btn edit-btn" onclick="startEditMode()">Редактировать товары</button>
     <button class="admin-btn delete-btn" onclick="startDeleteMode()">Удалить товары</button>
     <button class="admin-btn stats-btn" onclick="showStatsModal()">Статистика</button>
-    <button class="admin-btn" onclick="showBackupMenu()" style="background: linear-gradient(45deg, #ffcc00, #ff9900);">
-        Резервная копия
-    </button>
     <button class="logout-btn" onclick="logout()">Выйти</button>
 </div>
 
@@ -1145,11 +1155,7 @@ body {
         <input type="number" id="productPrice" placeholder="Цена (BYN)" min="0" step="0.01" required>
     </div>
     <div class="discount-container">
-        <input type="number" class="discount-input" id="productDiscount" placeholder="Скидка % (0-99)" min="0" max="99" step="1">
-        <select class="discount-input" id="discountType">
-            <option value="percent">%</option>
-            <option value="fixed">BYN</option>
-        </select>
+        <input type="number" class="discount-input" id="productDiscount" placeholder="Скидка в BYN" min="0" step="0.01">
     </div>
     <div class="modal-input-container">
         <input type="number" id="productQuantity" placeholder="Количество" min="0" required>
@@ -1182,11 +1188,7 @@ body {
         <input type="number" id="editProductPrice" placeholder="Цена (BYN)" min="0" step="0.01" required>
     </div>
     <div class="discount-container">
-        <input type="number" class="discount-input" id="editProductDiscount" placeholder="Скидка % (0-99)" min="0" max="99" step="1">
-        <select class="discount-input" id="editDiscountType">
-            <option value="percent">%</option>
-            <option value="fixed">BYN</option>
-        </select>
+        <input type="number" class="discount-input" id="editProductDiscount" placeholder="Скидка в BYN" min="0" step="0.01">
     </div>
     <div class="modal-input-container">
         <input type="number" id="editProductQuantity" placeholder="Количество" min="0" required>
@@ -1204,12 +1206,12 @@ body {
     <div id="statsContent" style="
         background: rgba(20, 15, 45, 0.6);
         border-radius: 10px;
-        padding: 20px;
-        margin: 15px 0;
+        padding: 15px; /* Уменьшил padding */
+        margin: 12px 0; /* Уменьшил отступы */
         border: 1px solid rgba(157, 78, 221, 0.3);
         text-align: center;
     ">
-        <div style="color: #d0c0ff; font-size: 0.9rem; margin-bottom: 15px;">
+        <div style="color: #d0c0ff; font-size: 0.85rem; margin-bottom: 12px;"> <!-- Уменьшил размер -->
             Загрузка статистики...
         </div>
     </div>
@@ -1238,45 +1240,6 @@ body {
     <button class="close-buy-btn" onclick="closeBuyModal()">Закрыть</button>
 </div>
 
-<!-- Меню резервного копирования -->
-<div class="backup-menu-modal" id="backupMenuModal">
-    <h3>Резервное копирование</h3>
-    
-    <button class="admin-btn" onclick="showBackupManager()" style="margin-bottom: 10px; background: linear-gradient(45deg, #ffcc00, #ff9900);">
-        Резервные копии
-    </button>
-    
-    <div class="modal-buttons">
-        <button class="cancel-modal-btn" onclick="closeBackupMenu()">Закрыть</button>
-    </div>
-</div>
-
-<!-- Модальное окно управления резервными копиями -->
-<div class="backup-modal" id="backupModal">
-    <h3>Резервные копии</h3>
-    
-    <div id="backupList" style="
-        max-height: 300px;
-        overflow-y: auto;
-        margin: 15px 0;
-        padding: 10px;
-        background: rgba(0,0,0,0.2);
-        border-radius: 10px;
-        border: 1px solid rgba(157,78,221,0.3);
-    ">
-        <div style="text-align:center;color:#aaa;padding:20px;">
-            Загрузка резервных копий...
-        </div>
-    </div>
-    
-    <div class="modal-buttons">
-        <button class="confirm-modal-btn" onclick="createManualBackup()" style="background:linear-gradient(45deg, #9d4edd, #6a00ff);">
-            Создать резервную копию
-        </button>
-        <button class="cancel-modal-btn" onclick="closeBackupModal()">Закрыть</button>
-    </div>
-</div>
-
 <!-- Кнопка выхода из режима удаления -->
 <button class="exit-delete-btn" id="exitDeleteBtn" onclick="exitDeleteMode()">✕ Отменить удаление</button>
 
@@ -1286,7 +1249,7 @@ body {
 <!-- Модальное окно удаления -->
 <div class="add-modal delete-modal" id="deleteModal">
     <h3>Удаление товара</h3>
-    <p id="deleteProductInfo" style="color: #d0c0ff; text-align: center; margin: 20px 0;">Вы уверены, что хотите удалить этот товар?</p>
+    <p id="deleteProductInfo" style="color: #d0c0ff; text-align: center; margin: 15px 0; font-size: 0.9rem;">Вы уверены, что хотите удалить этот товар?</p>
     <div class="modal-buttons">
         <button class="confirm-modal-btn" onclick="confirmDelete()" style="background: linear-gradient(45deg, #ff4d4d, #d43f3f);">Удалить</button>
         <button class="cancel-modal-btn" onclick="cancelDelete()">Отмена</button>
@@ -1314,7 +1277,7 @@ body {
 
 <!-- Товары -->
 <div class="products" id="productsContainer">
-    <div style="grid-column:1/-1; padding: 40px; color: #aaa;" id="loadingText">
+    <div style="grid-column:1/-1; padding: 30px; color: #aaa; font-size: 0.95rem;" id="loadingText"> <!-- Уменьшил размер -->
         Загрузка товаров...
     </div>
 </div>
@@ -1450,7 +1413,7 @@ function loadProducts() {
                 displayProducts(productsArray);
             } else {
                 container.innerHTML = 
-                    '<div style="grid-column:1/-1;color:#aaa;padding:40px;font-size:1.1rem;text-align:center;">Товаров пока нет<br><small>Добавьте первый товар через админ-панель</small></div>';
+                    '<div style="grid-column:1/-1;color:#aaa;padding:30px;font-size:0.95rem;text-align:center;">Товаров пока нет<br><small style="font-size:0.85rem;">Добавьте первый товар через админ-панель</small></div>';
             }
         });
         
@@ -1471,7 +1434,7 @@ function displayProducts(productsArray) {
     
     if (filteredProducts.length === 0) {
         container.innerHTML = 
-            '<div style="grid-column:1/-1;color:#aaa;padding:40px;font-size:1.1rem;text-align:center;">Нет товаров в этой категории</div>';
+            '<div style="grid-column:1/-1;color:#aaa;padding:30px;font-size:0.95rem;text-align:center;">Нет товаров в этой категории</div>';
         return;
     }
     
@@ -1509,14 +1472,10 @@ function createProductElement(product, productId) {
     let finalPrice = originalPrice;
     let discountText = '';
     
+    // Скидка только в BYN (убрали процентный тип)
     if (product.discount && product.discount > 0) {
-        if (product.discountType === 'percent') {
-            finalPrice = originalPrice * (1 - product.discount / 100);
-            discountText = `-${product.discount}%`;
-        } else if (product.discountType === 'fixed') {
-            finalPrice = originalPrice - product.discount;
-            discountText = `-${product.discount} BYN`;
-        }
+        finalPrice = originalPrice - product.discount;
+        discountText = `-${product.discount.toFixed(2)} BYN`;
         finalPrice = Math.max(0, finalPrice);
     }
     
@@ -1613,7 +1572,7 @@ function updateFlavorPlaceholder() {
     
     switch(category) {
         case 'pod':
-            input.placeholder = 'Бренд';
+            input.placeholder = 'Описание';
             break;
         case 'other':
             input.placeholder = 'Тип';
@@ -1629,7 +1588,7 @@ function updateEditFlavorPlaceholder() {
     
     switch(category) {
         case 'pod':
-            input.placeholder = 'Бренд';
+            input.placeholder = 'Описание';
             break;
         case 'other':
             input.placeholder = 'Тип';
@@ -1662,7 +1621,7 @@ async function loadStats() {
         
         if (!products) {
             statsContent.innerHTML = 
-                '<div style="color:#aaa;padding:20px;text-align:center;">Нет товаров для статистики</div>';
+                '<div style="color:#aaa;padding:15px;text-align:center;font-size:0.9rem;">Нет товаров для статистики</div>';
             return;
         }
         
@@ -1707,47 +1666,47 @@ async function loadStats() {
             <div style="
                 display: grid;
                 grid-template-columns: 1fr 1fr;
-                gap: 15px;
+                gap: 12px; /* Уменьшил gap */
                 text-align: center;
             ">
-                <div style="padding: 10px;">
-                    <div style="color: #d0c0ff; font-size: 0.85rem; margin-bottom: 5px;">Всего товаров</div>
-                    <div style="color: #9d4edd; font-weight: 700; font-size: 1.2rem;">${totalProducts}</div>
+                <div style="padding: 8px;"> <!-- Уменьшил padding -->
+                    <div style="color: #d0c0ff; font-size: 0.8rem; margin-bottom: 4px;">Всего товаров</div> <!-- Уменьшил размер -->
+                    <div style="color: #9d4edd; font-weight: 700; font-size: 1.1rem;">${totalProducts}</div> <!-- Уменьшил размер -->
                 </div>
                 
-                <div style="padding: 10px;">
-                    <div style="color: #d0c0ff; font-size: 0.85rem; margin-bottom: 5px;">В наличии</div>
-                    <div style="color: #38ef7d; font-weight: 700; font-size: 1.2rem;">${inStock}</div>
+                <div style="padding: 8px;">
+                    <div style="color: #d0c0ff; font-size: 0.8rem; margin-bottom: 4px;">В наличии</div>
+                    <div style="color: #38ef7d; font-weight: 700; font-size: 1.1rem;">${inStock}</div>
                 </div>
                 
-                <div style="padding: 10px;">
-                    <div style="color: #d0c0ff; font-size: 0.85rem; margin-bottom: 5px;">Нет в наличии</div>
-                    <div style="color: #ff4d4d; font-weight: 700; font-size: 1.2rem;">${outOfStock}</div>
+                <div style="padding: 8px;">
+                    <div style="color: #d0c0ff; font-size: 0.8rem; margin-bottom: 4px;">Нет в наличии</div>
+                    <div style="color: #ff4d4d; font-weight: 700; font-size: 1.1rem;">${outOfStock}</div>
                 </div>
                 
-                <div style="padding: 10px;">
-                    <div style="color: #d0c0ff; font-size: 0.85rem; margin-bottom: 5px;">Общая стоимость</div>
-                    <div style="color: #ffcc00; font-weight: 700; font-size: 1.1rem;">${totalValue.toFixed(2)} BYN</div>
+                <div style="padding: 8px;">
+                    <div style="color: #d0c0ff; font-size: 0.8rem; margin-bottom: 4px;">Общая стоимость</div>
+                    <div style="color: #ffcc00; font-weight: 700; font-size: 1rem;">${totalValue.toFixed(2)} BYN</div> <!-- Уменьшил размер -->
                 </div>
                 
-                <div style="padding: 10px;">
-                    <div style="color: #d0c0ff; font-size: 0.85rem; margin-bottom: 5px;">Со скидкой</div>
-                    <div style="color: #ff4d8d; font-weight: 700; font-size: 1.2rem;">${withDiscount}</div>
+                <div style="padding: 8px;">
+                    <div style="color: #d0c0ff; font-size: 0.8rem; margin-bottom: 4px;">Со скидкой</div>
+                    <div style="color: #ff4d8d; font-weight: 700; font-size: 1.1rem;">${withDiscount}</div>
                 </div>
                 
-                <div style="padding: 10px;">
-                    <div style="color: #d0c0ff; font-size: 0.85rem; margin-bottom: 5px;">Без скидки</div>
-                    <div style="color: #00b4db; font-weight: 700; font-size: 1.2rem;">${withoutDiscount}</div>
+                <div style="padding: 8px;">
+                    <div style="color: #d0c0ff; font-size: 0.8rem; margin-bottom: 4px;">Без скидки</div>
+                    <div style="color: #00b4db; font-weight: 700; font-size: 1.1rem;">${withoutDiscount}</div>
                 </div>
             </div>
             
-            <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid rgba(157,78,221,0.3);">
-                <div style="color: #fff; font-weight: 600; margin-bottom: 10px; font-size: 0.9rem;">По категориям:</div>
+            <div style="margin-top: 15px; padding-top: 12px; border-top: 1px solid rgba(157,78,221,0.3);"> <!-- Уменьшил отступы -->
+                <div style="color: #fff; font-weight: 600; margin-bottom: 8px; font-size: 0.85rem;">По категориям:</div> <!-- Уменьшил размер -->
                 <div style="
                     display: grid;
                     grid-template-columns: 1fr 1fr;
-                    gap: 8px;
-                    font-size: 0.85rem;
+                    gap: 6px; /* Уменьшил gap */
+                    font-size: 0.8rem; /* Уменьшил размер */
                 ">
                     <div style="display: flex; justify-content: space-between;">
                         <span style="color: #d0c0ff;">Жидкости:</span>
@@ -1772,7 +1731,7 @@ async function loadStats() {
     } catch (error) {
         console.error("Ошибка загрузки статистики:", error);
         document.getElementById('statsContent').innerHTML = 
-            '<div style="text-align:center;padding:20px;color:#ff4d4d;">Ошибка загрузки статистики</div>';
+            '<div style="text-align:center;padding:15px;color:#ff4d4d;font-size:0.9rem;">Ошибка загрузки статистики</div>'; // Уменьшил размер
     }
 }
 
@@ -1788,7 +1747,6 @@ async function addProduct() {
     const category = document.getElementById('productCategory').value;
     const priceInput = document.getElementById('productPrice').value;
     const discountInput = document.getElementById('productDiscount').value;
-    const discountType = document.getElementById('discountType').value;
     const quantityInput = document.getElementById('productQuantity').value;
     
     if (!name) {
@@ -1819,13 +1777,13 @@ async function addProduct() {
     }
     
     let discount = parseFloat(discountInput) || 0;
-    if (discount < 0 || discount > 99) {
-        showNotification('Скидка должна быть от 0 до 99%', 'error');
+    if (discount < 0) {
+        showNotification('Скидка не может быть отрицательной', 'error');
         return;
     }
     
-    if (discountType === 'fixed' && discount >= price) {
-        showNotification('Фиксированная скидка не может быть больше или равна цене', 'error');
+    if (discount >= price) {
+        showNotification('Скидка не может быть больше или равна цене', 'error');
         return;
     }
     
@@ -1855,7 +1813,7 @@ async function addProduct() {
     
     if (discount > 0) {
         newProduct.discount = discount;
-        newProduct.discountType = discountType;
+        // Убрали discountType - теперь только BYN
     }
     
     try {
@@ -1881,7 +1839,6 @@ function closeAddModal() {
         document.getElementById(id).value = '';
     });
     document.getElementById('productCategory').selectedIndex = 0;
-    document.getElementById('discountType').selectedIndex = 0;
 }
 
 function showAddModal() {
@@ -1969,9 +1926,6 @@ async function handleProductEdit(product) {
         categorySelect.value = productData.category || 'other';
         updateEditFlavorPlaceholder();
         
-        const discountTypeSelect = document.getElementById('editDiscountType');
-        discountTypeSelect.value = productData.discountType || 'percent';
-        
         document.getElementById('overlay').style.display = 'block';
         document.getElementById('editModal').style.display = 'block';
         
@@ -1992,7 +1946,6 @@ async function saveProductEdit() {
     const category = document.getElementById('editProductCategory').value;
     const priceInput = document.getElementById('editProductPrice').value;
     const discountInput = document.getElementById('editProductDiscount').value;
-    const discountType = document.getElementById('editDiscountType').value;
     const quantityInput = document.getElementById('editProductQuantity').value;
     
     if (!name) {
@@ -2018,13 +1971,13 @@ async function saveProductEdit() {
     }
     
     let discount = parseFloat(discountInput) || 0;
-    if (discount < 0 || discount > 99) {
-        showNotification('Скидка должна быть от 0 до 99%', 'error');
+    if (discount < 0) {
+        showNotification('Скидка не может быть отрицательной', 'error');
         return;
     }
     
-    if (discountType === 'fixed' && discount >= price) {
-        showNotification('Фиксированная скидка не может быть больше или равна цене', 'error');
+    if (discount >= price) {
+        showNotification('Скидка не может быть больше или равна цене', 'error');
         return;
     }
     
@@ -2054,10 +2007,8 @@ async function saveProductEdit() {
     
     if (discount > 0) {
         updatedProduct.discount = discount;
-        updatedProduct.discountType = discountType;
     } else {
         updatedProduct.discount = null;
-        updatedProduct.discountType = null;
     }
     
     try {
@@ -2102,11 +2053,7 @@ async function showBuyModal(productId, category) {
         
         let finalPrice = parseFloat(product.price || 0);
         if (product.discount && product.discount > 0) {
-            if (product.discountType === 'percent') {
-                finalPrice = finalPrice * (1 - product.discount / 100);
-            } else if (product.discountType === 'fixed') {
-                finalPrice = finalPrice - product.discount;
-            }
+            finalPrice = finalPrice - product.discount;
             finalPrice = Math.max(0, finalPrice);
         }
         
@@ -2115,7 +2062,7 @@ async function showBuyModal(productId, category) {
                    `Категория: ${categoryName}\n`;
         
         if (product.category === 'pod') {
-            orderText += `Бренд: ${product.flavor}\n`;
+            orderText += `Описание: ${product.flavor}\n`;
         } else if (product.category === 'other') {
             orderText += `Тип: ${product.flavor}\n`;
         } else {
@@ -2123,7 +2070,7 @@ async function showBuyModal(productId, category) {
         }
         
         if (product.discount && product.discount > 0) {
-            orderText += `Цена: ${finalPrice.toFixed(2)} BYN (скидка ${product.discount}${product.discountType === 'percent' ? '%' : ' BYN'})\n`;
+            orderText += `Цена: ${finalPrice.toFixed(2)} BYN (скидка ${product.discount} BYN)\n`;
         } else {
             orderText += `Цена: ${finalPrice.toFixed(2)} BYN\n`;
         }
@@ -2274,188 +2221,8 @@ function closeAllModals() {
     document.getElementById('buyModal').style.display = 'none';
     document.getElementById('loginForm').style.display = 'none';
     document.getElementById('statsModal').style.display = 'none';
-    document.getElementById('backupModal').style.display = 'none';
-    document.getElementById('backupMenuModal').style.display = 'none';
     productToDelete = null;
     currentProductId = null;
-}
-
-// ====================== РЕЗЕРВНОЕ КОПИРОВАНИЕ ======================
-async function createBackup() {
-    try {
-        const snapshot = await database.ref('products').once('value');
-        const products = snapshot.val();
-        
-        if (!products) return null;
-        
-        const backupData = {
-            timestamp: Date.now(),
-            date: new Date().toISOString(),
-            count: Object.keys(products).length,
-            data: products
-        };
-        
-        // Сохраняем в локальное хранилище (последние 5 копий)
-        const backups = JSON.parse(localStorage.getItem('isterika_backups') || '[]');
-        backups.unshift(backupData);
-        
-        // Ограничиваем количество сохраненных копий
-        if (backups.length > 5) {
-            backups.pop();
-        }
-        
-        localStorage.setItem('isterika_backups', JSON.stringify(backups));
-        
-        console.log('✅ Резервная копия создана:', backupData.count, 'товаров');
-        return backupData;
-        
-    } catch (error) {
-        console.error('Ошибка создания резервной копии:', error);
-        return null;
-    }
-}
-
-// ====================== УПРАВЛЕНИЕ РЕЗЕРВНЫМИ КОПИЯМИ ======================
-function showBackupMenu() {
-    document.getElementById('overlay').style.display = 'block';
-    document.getElementById('backupMenuModal').style.display = 'block';
-    document.getElementById('adminPanel').style.display = 'none';
-}
-
-function closeBackupMenu() {
-    document.getElementById('overlay').style.display = 'none';
-    document.getElementById('backupMenuModal').style.display = 'none';
-}
-
-function showBackupManager() {
-    document.getElementById('overlay').style.display = 'block';
-    document.getElementById('backupModal').style.display = 'block';
-    document.getElementById('backupMenuModal').style.display = 'none';
-    loadBackupList();
-}
-
-function closeBackupModal() {
-    document.getElementById('overlay').style.display = 'none';
-    document.getElementById('backupModal').style.display = 'none';
-}
-
-function loadBackupList() {
-    const backups = JSON.parse(localStorage.getItem('isterika_backups') || '[]');
-    const backupList = document.getElementById('backupList');
-    
-    if (backups.length === 0) {
-        backupList.innerHTML = `
-            <div style="text-align:center;color:#aaa;padding:20px;">
-                Резервные копии не найдены
-            </div>
-        `;
-        return;
-    }
-    
-    let html = '';
-    backups.forEach((backup, index) => {
-        const date = new Date(backup.timestamp);
-        const formattedDate = date.toLocaleString('ru-RU');
-        
-        html += `
-            <div style="
-                background: rgba(20,15,45,0.6);
-                border-radius: 8px;
-                padding: 12px;
-                margin-bottom: 10px;
-                border: 1px solid rgba(157,78,221,0.2);
-            ">
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-                    <div style="font-weight:600;color:#fff;">Копия #${index + 1}</div>
-                    <div style="font-size:0.8rem;color:#9d4edd;">${backup.count} товаров</div>
-                </div>
-                <div style="font-size:0.8rem;color:#d0c0ff;margin-bottom:8px;text-align:center;">
-                    ${formattedDate}
-                </div>
-                <div style="display:flex;gap:8px;">
-                    <button onclick="restoreBackup(${index})" style="
-                        flex:1;
-                        padding: 8px;
-                        background: linear-gradient(45deg, #00b4db, #0083b0);
-                        border: none;
-                        border-radius: 6px;
-                        color: white;
-                        font-size: 0.85rem;
-                        cursor: pointer;
-                    ">Восстановить</button>
-                    <button onclick="exportBackup(${index})" style="
-                        flex:1;
-                        padding: 8px;
-                        background: linear-gradient(45deg, #38ef7d, #11998e);
-                        border: none;
-                        border-radius: 6px;
-                        color: white;
-                        font-size: 0.85rem;
-                        cursor: pointer;
-                    ">Экспорт</button>
-                </div>
-            </div>
-        `;
-    });
-    
-    backupList.innerHTML = html;
-}
-
-async function createManualBackup() {
-    const backup = await createBackup();
-    if (backup) {
-        showNotification(`✅ Резервная копия создана (${backup.count} товаров)`, 'success');
-        loadBackupList();
-    }
-}
-
-async function restoreBackup(index) {
-    const backups = JSON.parse(localStorage.getItem('isterika_backups') || '[]');
-    if (!backups[index]) return;
-    
-    const backup = backups[index];
-    
-    if (!confirm(`Восстановить резервную копию от ${new Date(backup.timestamp).toLocaleString()}?\n\nЭто перезапишет ВСЕ текущие товары!`)) {
-        return;
-    }
-    
-    try {
-        // Очищаем все текущие товары
-        await database.ref('products').remove();
-        
-        // Восстанавливаем из резервной копии
-        for (const [productId, productData] of Object.entries(backup.data)) {
-            await database.ref('products/' + productId).set(productData);
-        }
-        
-        showNotification(`✅ Резервная копия восстановлена (${backup.count} товаров)`, 'success', 5000);
-        closeBackupModal();
-        closeBackupMenu();
-        filterProducts(currentFilter);
-        
-    } catch (error) {
-        console.error("Ошибка восстановления:", error);
-        showNotification('❌ Ошибка восстановления резервной копии', 'error');
-    }
-}
-
-function exportBackup(index) {
-    const backups = JSON.parse(localStorage.getItem('isterika_backups') || '[]');
-    if (!backups[index]) return;
-    
-    const backup = backups[index];
-    const dataStr = JSON.stringify(backup, null, 2);
-    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-    
-    const date = new Date(backup.timestamp);
-    const fileName = `isterika-restore-${date.toISOString().split('T')[0]}.json`;
-    
-    const linkElement = document.createElement('a');
-    linkElement.setAttribute('href', dataUri);
-    linkElement.setAttribute('download', fileName);
-    linkElement.click();
-    
-    showNotification('✅ Резервная копия экспортирована', 'success');
 }
 
 // ====================== ЗАГРУЗКА ======================
