@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>SMOKE</title>
+<title>ISTERIKA</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -176,27 +176,27 @@ body {
 .products {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
+    gap: 16px;
     padding: 15px 12px 80px;
     max-width: 1400px;
     margin: 0 auto;
     box-sizing: border-box;
 }
 
-/* КАРТОЧКА ТОВАРА */
+/* КОМПАКТНАЯ КАРТОЧКА ТОВАРА */
 .product-item {
     background: rgba(255, 255, 255, 0.05);
-    border-radius: 14px;
+    border-radius: 16px;
     border: 1px solid rgba(157, 78, 221, 0.3);
-    padding: 15px 12px;
+    padding: 0;
     display: flex;
     flex-direction: column;
-    gap: 8px;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     overflow: hidden;
     backdrop-filter: blur(8px);
-    min-height: 280px;
+    min-height: 320px; /* Более компактная высота */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .product-item::before {
@@ -210,9 +210,9 @@ body {
 }
 
 .product-item:hover {
-    transform: translateY(-3px);
+    transform: translateY(-5px);
     border-color: #9d4edd;
-    box-shadow: 0 8px 20px rgba(157, 78, 221, 0.3);
+    box-shadow: 0 12px 30px rgba(157, 78, 221, 0.25);
     background: rgba(255, 255, 255, 0.08);
 }
 
@@ -229,130 +229,146 @@ body {
     cursor: pointer;
 }
 
-.product-category {
-    padding: 5px 12px;
-    border-radius: 15px;
-    font-size: 0.7rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    margin-bottom: 8px;
-    width: fit-content;
-    margin-left: auto;
-    margin-right: auto;
-    display: block;
+/* ФОТОГРАФИЯ ТОВАРА */
+.product-photo {
+    width: 100%;
+    height: 160px; /* Уменьшена высота */
+    background: linear-gradient(135deg, rgba(157, 78, 221, 0.1), rgba(106, 0, 255, 0.1));
+    border-bottom: 1px solid rgba(157, 78, 221, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
 }
 
-.category-liquid { 
-    background: linear-gradient(45deg, #00b4db, #0083b0);
-    color: white;
-}
-.category-pod { 
-    background: linear-gradient(45deg, #ff4d8d, #ff3366);
-    color: white;
-}
-.category-snus { 
-    background: linear-gradient(45deg, #9d4edd, #6a00ff);
-    color: white;
-}
-.category-other { 
-    background: linear-gradient(45deg, #38ef7d, #11998e);
-    color: white;
+.product-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
 }
 
+.product-item:hover .product-photo img {
+    transform: scale(1.05);
+}
+
+.photo-placeholder {
+    color: rgba(255, 255, 255, 0.3);
+    font-size: 2.5rem; /* Уменьшен размер */
+    font-weight: 300;
+}
+
+/* КОНТЕНТ КАРТОЧКИ - КОМПАКТНЫЙ */
 .product-content {
+    padding: 12px; /* Уменьшен padding */
     display: flex;
     flex-direction: column;
-    gap: 8px;
     flex: 1;
+    gap: 6px; /* Уменьшен gap между элементами */
 }
 
+/* КАТЕГОРИЯ УБРАНА ИЗ КАРТОЧКИ */
+
 .product-name {
-    font-size: 1.1rem;
+    font-size: 1.1rem; /* Немного уменьшен */
     font-weight: 800;
-    line-height: 1.3;
-    min-height: 2.4em;
+    line-height: 1.2;
+    min-height: 1.8em; /* Уменьшена высота */
     display: flex;
     align-items: center;
     justify-content: center;
     color: #fff;
-    margin-bottom: 5px;
+    margin: 0; /* Убраны отступы */
+    padding: 0 5px;
 }
 
+/* ДЕКОРАТИВНЫЙ РАЗДЕЛИТЕЛЬ */
+.content-divider {
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(157, 78, 221, 0.4), transparent);
+    margin: 4px 0 6px 0; /* Уменьшены отступы */
+    border-radius: 1px;
+}
+
+/* ВКУС/ОПИСАНИЕ БЕЗ РАМКИ */
 .product-flavor {
-    color: #ffffff;
-    font-size: 0.9rem;
-    font-weight: 600;
-    min-height: 3em;
-    line-height: 1.4;
-    background: rgba(157, 78, 221, 0.15);
-    padding: 8px 10px;
-    border-radius: 10px;
-    border: 2px solid rgba(157, 78, 221, 0.4);
-    margin: 3px 0;
+    color: #d0c0ff;
+    font-size: 1rem; /* Немного уменьшен */
+    font-weight: 500;
+    line-height: 1.3;
+    margin: 0; /* Убраны отступы */
+    padding: 0;
     flex: 1;
+    /* Убраны все рамки и фоны */
+    background: none;
+    border: none;
+    box-shadow: none;
+    min-height: 1.5em;
 }
 
+/* ЦЕНА */
 .product-price {
-    font-size: 1.3rem;
+    font-size: 1.3rem; /* Немного уменьшен */
     font-weight: 800;
     color: #9dff9d;
-    margin: 5px 0;
+    margin: 4px 0; /* Уменьшены отступы */
 }
 
 .discount-price {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
+    gap: 8px; /* Уменьшен gap */
     flex-wrap: wrap;
 }
 
 .original-price {
     text-decoration: line-through;
     color: #ff9999;
-    font-size: 1rem;
+    font-size: 0.9rem; /* Уменьшен */
     opacity: 0.7;
 }
 
 .discount-badge {
     background: linear-gradient(45deg, #ff3366, #ff4d8d);
     color: white;
-    padding: 3px 8px;
-    border-radius: 8px;
-    font-size: 0.8rem;
+    padding: 2px 6px; /* Уменьшен padding */
+    border-radius: 6px;
+    font-size: 0.75rem; /* Уменьшен */
     font-weight: 700;
 }
 
 .price-number::after {
     content: " BYN";
-    font-size: 0.8em;
+    font-size: 0.75em; /* Уменьшен */
     opacity: 0.9;
     margin-left: 2px;
     font-weight: 600;
 }
 
+/* ОСТАТОК - БЕЛЫЙ, ЖИРНЫЙ, БЕЗ РАМКИ */
 .quantity-badge {
-    padding: 6px 12px;
-    border: 1.5px solid #9d4edd;
-    border-radius: 15px;
-    background: rgba(157, 78, 221, 0.1);
-    font-size: 0.8rem;
-    font-weight: 600;
+    padding: 0;
+    font-size: 0.85rem;
+    font-weight: 700; /* Жирный шрифт */
     display: inline-block;
-    margin: 3px auto;
+    margin: 2px auto; /* Уменьшены отступы */
     width: fit-content;
+    color: #fff; /* Белый цвет */
+    /* Убраны рамки и фон */
+    background: none;
+    border: none;
 }
 
 .quantity-badge.out-of-stock {
-    border-color: #ff4d4d;
     color: #ff4d4d;
-    background: rgba(255, 77, 77, 0.1);
 }
 
 /* КНОПКИ */
 .buy-btn {
-    padding: 10px 15px;
+    padding: 10px 15px; /* Уменьшен padding */
     background: linear-gradient(45deg, #9d4edd, #6a00ff);
     border: none;
     border-radius: 10px;
@@ -361,8 +377,8 @@ body {
     cursor: pointer;
     width: 100%;
     box-sizing: border-box;
-    margin-top: 8px;
-    font-size: 0.9rem;
+    margin-top: 8px; /* Уменьшен отступ */
+    font-size: 0.9rem; /* Уменьшен */
     letter-spacing: 0.8px;
     transition: all 0.3s;
     position: relative;
@@ -603,6 +619,10 @@ body {
     background: linear-gradient(45deg, #8e2de2, #4a00e0);
 }
 
+.admin-btn.photo-btn {
+    background: linear-gradient(45deg, #ffcc00, #ff9900);
+}
+
 .logout-btn {
     background: rgba(255, 255, 255, 0.1);
     color: #fff;
@@ -615,7 +635,7 @@ body {
 }
 
 /* МОДАЛЬНЫЕ ОКНА */
-.add-modal, .edit-modal {
+.add-modal, .edit-modal, .photo-modal, .photo-zoom-modal {
     position: fixed;
     top: 50%;
     left: 50%;
@@ -631,7 +651,7 @@ body {
     box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5);
 }
 
-.add-modal h3, .edit-modal h3 {
+.add-modal h3, .edit-modal h3, .photo-modal h3, .photo-zoom-modal h3 {
     color: #fff;
     font-size: 1.6rem;
     margin: 0 0 25px 0;
@@ -676,6 +696,128 @@ body {
 .modal-input-container select option {
     background: #1a1a2e;
     color: #fff;
+}
+
+/* ПОЛЕ ЗАГРУЗКИ ФОТО С МАСШТАБИРОВАНИЕМ */
+.photo-upload-container {
+    margin-bottom: 20px;
+}
+
+.photo-preview-container {
+    width: 200px;
+    height: 200px;
+    margin: 0 auto 15px;
+    border: 2px dashed rgba(157, 78, 221, 0.3);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.05);
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+}
+
+.photo-preview-container:hover {
+    border-color: #9d4edd;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.photo-preview {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    transform-origin: center center;
+    transition: transform 0.3s;
+}
+
+.photo-placeholder-icon {
+    font-size: 2.5rem;
+    color: rgba(157, 78, 221, 0.5);
+}
+
+.photo-zoom-controls {
+    margin-top: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+}
+
+.zoom-btn {
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(157, 78, 221, 0.3);
+    border-radius: 50%;
+    color: white;
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+}
+
+.zoom-btn:hover {
+    background: rgba(157, 78, 221, 0.3);
+    transform: scale(1.1);
+}
+
+.zoom-value {
+    min-width: 60px;
+    text-align: center;
+    color: #d0c0ff;
+    font-weight: 600;
+}
+
+.photo-upload-btn {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(45deg, #9d4edd, #6a00ff);
+    border: none;
+    border-radius: 10px;
+    color: white;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-top: 10px;
+}
+
+.photo-upload-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(157, 78, 221, 0.4);
+}
+
+.photo-controls {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.photo-control-btn {
+    flex: 1;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(157, 78, 221, 0.3);
+    border-radius: 8px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.photo-control-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.photo-error {
+    color: #ff4d4d;
+    font-size: 0.85rem;
+    margin-top: 8px;
+    text-align: center;
+    display: none;
 }
 
 .discount-container {
@@ -996,19 +1138,20 @@ body {
     }
     
     .product-item {
-        padding: 12px 10px;
-        min-height: 260px;
+        min-height: 300px; /* Еще более компактная на мобильных */
     }
     
-    .product-flavor {
-        font-size: 0.85rem;
-        padding: 7px 9px;
-        min-height: 2.8em;
+    .product-photo {
+        height: 140px;
     }
     
     .product-name {
         font-size: 1rem;
-        min-height: 2.2em;
+        min-height: 1.6em;
+    }
+    
+    .product-flavor {
+        font-size: 0.9rem;
     }
     
     .login-btn-main, .admin-btn-main {
@@ -1040,12 +1183,21 @@ body {
     .login-form, .add-modal, .edit-modal, .buy-modal, .stats-modal, .backup-modal, .backup-menu-modal {
         padding: 25px 20px;
     }
+    
+    .photo-preview-container {
+        width: 150px;
+        height: 150px;
+    }
 }
 
 @media (min-width: 481px) and (max-width: 768px) {
     .products {
         grid-template-columns: repeat(2, 1fr);
-        gap: 12px;
+        gap: 14px;
+    }
+    
+    .product-photo {
+        height: 160px;
     }
     
     .admin-panel {
@@ -1056,12 +1208,16 @@ body {
 @media (min-width: 769px) {
     .products {
         grid-template-columns: repeat(3, 1fr);
-        gap: 16px;
+        gap: 20px;
         padding: 20px 15px 90px;
     }
     
     .product-item {
-        min-height: 290px;
+        min-height: 340px; /* Компактная высота на десктопе */
+    }
+    
+    .product-photo {
+        height: 180px;
     }
     
     .admin-panel {
@@ -1072,8 +1228,16 @@ body {
 @media (min-width: 1200px) {
     .products {
         grid-template-columns: repeat(4, 1fr);
-        gap: 18px;
+        gap: 24px;
         padding: 25px 20px 100px;
+    }
+    
+    .product-item {
+        min-height: 360px;
+    }
+    
+    .product-photo {
+        height: 200px;
     }
 }
 
@@ -1116,37 +1280,35 @@ body {
     <button class="admin-btn edit-btn" onclick="startEditMode()">Редактировать товары</button>
     <button class="admin-btn delete-btn" onclick="startDeleteMode()">Удалить товары</button>
     <button class="admin-btn stats-btn" onclick="showStatsModal()">Статистика</button>
+    <button class="admin-btn photo-btn" onclick="showPhotoManager()">Управление фото</button>
     <button class="admin-btn" onclick="showBackupMenu()" style="background: linear-gradient(45deg, #ffcc00, #ff9900);">
         Резервная копия
     </button>
     <button class="logout-btn" onclick="logout()">Выйти</button>
 </div>
 
-<!-- Модальное окно статистики -->
-<div class="stats-modal" id="statsModal">
-    <h3>Статистика магазина</h3>
-    
-    <div id="statsContent" style="
-        background: rgba(20, 15, 45, 0.6);
-        border-radius: 10px;
-        padding: 20px;
-        margin: 15px 0;
-        border: 1px solid rgba(157, 78, 221, 0.3);
-        text-align: center;
-    ">
-        <div style="color: #d0c0ff; font-size: 0.9rem; margin-bottom: 15px;">
-            Загрузка статистики...
-        </div>
-    </div>
-    
-    <div class="modal-buttons">
-        <button class="confirm-modal-btn" onclick="closeStatsModal()">Закрыть</button>
-    </div>
-</div>
-
-<!-- Модальное окно добавления товара -->
+<!-- Модальное окно добавления товара с фото и масштабированием -->
 <div class="add-modal" id="addModal">
     <h3>Добавить товар</h3>
+    
+    <div class="photo-upload-container">
+        <div class="photo-preview-container" id="addPhotoPreviewContainer" onclick="document.getElementById('addProductPhoto').click()">
+            <div class="photo-placeholder-icon">📷</div>
+        </div>
+        <input type="file" id="addProductPhoto" accept="image/jpeg,image/png" style="display: none;" onchange="previewAddPhoto(event)">
+        <div class="photo-error" id="addPhotoError"></div>
+        
+        <div class="photo-zoom-controls" id="addZoomControls" style="display: none;">
+            <button class="zoom-btn" onclick="zoomOut('add')">-</button>
+            <div class="zoom-value" id="addZoomValue">100%</div>
+            <button class="zoom-btn" onclick="zoomIn('add')">+</button>
+        </div>
+        
+        <button type="button" class="photo-upload-btn" onclick="document.getElementById('addProductPhoto').click()">
+            Загрузить фото товара
+        </button>
+    </div>
+    
     <div class="modal-input-container">
         <input type="text" id="productName" placeholder="Название товара" required>
     </div>
@@ -1181,9 +1343,28 @@ body {
     </div>
 </div>
 
-<!-- Модальное окно редактирования товара -->
+<!-- Модальное окно редактирования товара с фото и масштабированием -->
 <div class="edit-modal" id="editModal">
     <h3>Редактировать товар</h3>
+    
+    <div class="photo-upload-container">
+        <div class="photo-preview-container" id="editPhotoPreviewContainer" onclick="document.getElementById('editProductPhoto').click()">
+            <div class="photo-placeholder-icon">📷</div>
+        </div>
+        <input type="file" id="editProductPhoto" accept="image/jpeg,image/png" style="display: none;" onchange="previewEditPhoto(event)">
+        <div class="photo-error" id="editPhotoError"></div>
+        
+        <div class="photo-zoom-controls" id="editZoomControls" style="display: none;">
+            <button class="zoom-btn" onclick="zoomOut('edit')">-</button>
+            <div class="zoom-value" id="editZoomValue">100%</div>
+            <button class="zoom-btn" onclick="zoomIn('edit')">+</button>
+        </div>
+        
+        <button type="button" class="photo-upload-btn" onclick="document.getElementById('editProductPhoto').click()">
+            Изменить фото товара
+        </button>
+    </div>
+    
     <div class="modal-input-container">
         <input type="text" id="editProductName" placeholder="Название товара" required>
     </div>
@@ -1217,6 +1398,51 @@ body {
     </div>
 </div>
 
+<!-- Модальное окно управления фотографиями -->
+<div class="photo-modal" id="photoModal">
+    <h3>Управление фотографиями</h3>
+    
+    <div id="photoManagerContent" style="
+        max-height: 400px;
+        overflow-y: auto;
+        margin: 15px 0;
+        padding: 10px;
+        background: rgba(0,0,0,0.2);
+        border-radius: 10px;
+        border: 1px solid rgba(157,78,221,0.3);
+    ">
+        <div style="text-align:center;color:#aaa;padding:20px;">
+            Загрузка списка товаров...
+        </div>
+    </div>
+    
+    <div class="modal-buttons">
+        <button class="confirm-modal-btn" onclick="closePhotoModal()">Закрыть</button>
+    </div>
+</div>
+
+<!-- Модальное окно статистики -->
+<div class="stats-modal" id="statsModal">
+    <h3>Статистика магазина</h3>
+    
+    <div id="statsContent" style="
+        background: rgba(20, 15, 45, 0.6);
+        border-radius: 10px;
+        padding: 20px;
+        margin: 15px 0;
+        border: 1px solid rgba(157, 78, 221, 0.3);
+        text-align: center;
+    ">
+        <div style="color: #d0c0ff; font-size: 0.9rem; margin-bottom: 15px;">
+            Загрузка статистики...
+        </div>
+    </div>
+    
+    <div class="modal-buttons">
+        <button class="confirm-modal-btn" onclick="closeStatsModal()">Закрыть</button>
+    </div>
+</div>
+
 <!-- Модальное окно покупки -->
 <div class="buy-modal" id="buyModal">
     <h3>Оформление заказа</h3>
@@ -1236,16 +1462,10 @@ body {
     <button class="close-buy-btn" onclick="closeBuyModal()">Закрыть</button>
 </div>
 
-<!-- Меню резервного копирования -->
+<!-- Меню резервного копирования (удалены кнопки Экспорт/Импорт) -->
 <div class="backup-menu-modal" id="backupMenuModal">
     <h3>Резервное копирование</h3>
     
-    <button class="admin-btn" onclick="exportProducts()" style="margin-bottom: 10px; background: linear-gradient(45deg, #38ef7d, #11998e);">
-        Экспорт товаров
-    </button>
-    <button class="admin-btn" onclick="importProducts()" style="margin-bottom: 10px; background: linear-gradient(45deg, #ff9a00, #ff5e00);">
-        Импорт товаров
-    </button>
     <button class="admin-btn" onclick="showBackupManager()" style="margin-bottom: 10px; background: linear-gradient(45deg, #ffcc00, #ff9900);">
         Резервные копии
     </button>
@@ -1302,8 +1522,8 @@ body {
 
 <!-- Шапка -->
 <div class="header">
-    <div class="magazine">магазин</div>
-    <div class="title">SMOKE</div>
+    <div class="magazine">Магазин</div>
+    <div class="title">ISTERIKA</div>
     <div class="divider"></div>
 </div>
 
@@ -1349,6 +1569,12 @@ let currentFilter = 'all';
 let productsRef = null;
 let isOperationInProgress = false;
 
+// Переменные для масштабирования фото
+let currentPhotoFile = null;
+let currentEditPhotoFile = null;
+let addZoomLevel = 1;
+let editZoomLevel = 1;
+
 // ====================== УВЕДОМЛЕНИЯ ======================
 function showNotification(message, type = 'info', duration = 3000) {
     const notification = document.getElementById('notification');
@@ -1369,6 +1595,306 @@ function closeNotification() {
     document.getElementById('notification').style.display = 'none';
 }
 
+// ====================== СИСТЕМА ФОТОГРАФИЙ С МАСШТАБИРОВАНИЕМ ======================
+function previewAddPhoto(event) {
+    const file = event.target.files[0];
+    const errorDiv = document.getElementById('addPhotoError');
+    const previewContainer = document.getElementById('addPhotoPreviewContainer');
+    const zoomControls = document.getElementById('addZoomControls');
+    
+    if (!file) return;
+    
+    // Валидация
+    const validTypes = ['image/jpeg', 'image/png'];
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    
+    if (!validTypes.includes(file.type)) {
+        errorDiv.textContent = 'Формат файла должен быть JPG или PNG';
+        errorDiv.style.display = 'block';
+        return;
+    }
+    
+    if (file.size > maxSize) {
+        errorDiv.textContent = 'Размер файла не должен превышать 5MB';
+        errorDiv.style.display = 'block';
+        return;
+    }
+    
+    errorDiv.style.display = 'none';
+    currentPhotoFile = file;
+    addZoomLevel = 1; // Сброс масштаба
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        previewContainer.innerHTML = `<img src="${e.target.result}" class="photo-preview" id="addPhotoPreview" style="transform: scale(${addZoomLevel})">`;
+        zoomControls.style.display = 'flex';
+        document.getElementById('addZoomValue').textContent = Math.round(addZoomLevel * 100) + '%';
+    };
+    reader.readAsDataURL(file);
+}
+
+function previewEditPhoto(event) {
+    const file = event.target.files[0];
+    const errorDiv = document.getElementById('editPhotoError');
+    const previewContainer = document.getElementById('editPhotoPreviewContainer');
+    const zoomControls = document.getElementById('editZoomControls');
+    
+    if (!file) return;
+    
+    // Валидация
+    const validTypes = ['image/jpeg', 'image/png'];
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    
+    if (!validTypes.includes(file.type)) {
+        errorDiv.textContent = 'Формат файла должен быть JPG или PNG';
+        errorDiv.style.display = 'block';
+        return;
+    }
+    
+    if (file.size > maxSize) {
+        errorDiv.textContent = 'Размер файла не должен превышать 5MB';
+        errorDiv.style.display = 'block';
+        return;
+    }
+    
+    errorDiv.style.display = 'none';
+    currentEditPhotoFile = file;
+    editZoomLevel = 1; // Сброс масштаба
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        previewContainer.innerHTML = `<img src="${e.target.result}" class="photo-preview" id="editPhotoPreview" style="transform: scale(${editZoomLevel})">`;
+        zoomControls.style.display = 'flex';
+        document.getElementById('editZoomValue').textContent = Math.round(editZoomLevel * 100) + '%';
+    };
+    reader.readAsDataURL(file);
+}
+
+// Функции масштабирования
+function zoomIn(type) {
+    if (type === 'add') {
+        if (addZoomLevel < 3) {
+            addZoomLevel += 0.1;
+            const preview = document.getElementById('addPhotoPreview');
+            if (preview) {
+                preview.style.transform = `scale(${addZoomLevel})`;
+                document.getElementById('addZoomValue').textContent = Math.round(addZoomLevel * 100) + '%';
+            }
+        }
+    } else if (type === 'edit') {
+        if (editZoomLevel < 3) {
+            editZoomLevel += 0.1;
+            const preview = document.getElementById('editPhotoPreview');
+            if (preview) {
+                preview.style.transform = `scale(${editZoomLevel})`;
+                document.getElementById('editZoomValue').textContent = Math.round(editZoomLevel * 100) + '%';
+            }
+        }
+    }
+}
+
+function zoomOut(type) {
+    if (type === 'add') {
+        if (addZoomLevel > 0.3) {
+            addZoomLevel -= 0.1;
+            const preview = document.getElementById('addPhotoPreview');
+            if (preview) {
+                preview.style.transform = `scale(${addZoomLevel})`;
+                document.getElementById('addZoomValue').textContent = Math.round(addZoomLevel * 100) + '%';
+            }
+        }
+    } else if (type === 'edit') {
+        if (editZoomLevel > 0.3) {
+            editZoomLevel -= 0.1;
+            const preview = document.getElementById('editPhotoPreview');
+            if (preview) {
+                preview.style.transform = `scale(${editZoomLevel})`;
+                document.getElementById('editZoomValue').textContent = Math.round(editZoomLevel * 100) + '%';
+            }
+        }
+    }
+}
+
+function showPhotoManager() {
+    document.getElementById('overlay').style.display = 'block';
+    document.getElementById('photoModal').style.display = 'block';
+    document.getElementById('adminPanel').style.display = 'none';
+    loadPhotoManager();
+}
+
+function closePhotoModal() {
+    document.getElementById('overlay').style.display = 'none';
+    document.getElementById('photoModal').style.display = 'none';
+}
+
+async function loadPhotoManager() {
+    try {
+        const snapshot = await database.ref('products').once('value');
+        const products = snapshot.val();
+        const content = document.getElementById('photoManagerContent');
+        
+        if (!products) {
+            content.innerHTML = `
+                <div style="text-align:center;color:#aaa;padding:20px;">
+                    Товаров не найдено
+                </div>
+            `;
+            return;
+        }
+        
+        let html = '';
+        Object.entries(products).forEach(([productId, product]) => {
+            const hasPhoto = product.photoUrl && product.photoUrl !== '';
+            
+            html += `
+                <div style="
+                    background: rgba(20,15,45,0.6);
+                    border-radius: 10px;
+                    padding: 15px;
+                    margin-bottom: 10px;
+                    border: 1px solid rgba(157,78,221,0.2);
+                ">
+                    <div style="display:flex;align-items:center;gap:15px;margin-bottom:10px;">
+                        <div style="
+                            width: 60px;
+                            height: 60px;
+                            border-radius: 8px;
+                            overflow: hidden;
+                            background: ${hasPhoto ? 'transparent' : 'rgba(157,78,221,0.1)'};
+                            border: 1px solid rgba(157,78,221,0.3);
+                        ">
+                            ${hasPhoto 
+                                ? `<img src="${product.photoUrl}" style="width:100%;height:100%;object-fit:cover;">`
+                                : `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:rgba(255,255,255,0.3);">📷</div>`
+                            }
+                        </div>
+                        <div style="flex:1;">
+                            <div style="font-weight:600;color:#fff;margin-bottom:5px;">${product.name || 'Без названия'}</div>
+                            <div style="font-size:0.85rem;color:#d0c0ff;">${product.flavor || 'Нет описания'}</div>
+                        </div>
+                    </div>
+                    
+                    <div style="display:flex;gap:8px;">
+                        <button onclick="uploadProductPhoto('${productId}')" style="
+                            flex:1;
+                            padding: 8px;
+                            background: linear-gradient(45deg, #9d4edd, #6a00ff);
+                            border: none;
+                            border-radius: 6px;
+                            color: white;
+                            font-size: 0.85rem;
+                            cursor: pointer;
+                        ">${hasPhoto ? 'Изменить фото' : 'Загрузить фото'}</button>
+                        ${hasPhoto ? `
+                        <button onclick="removeProductPhoto('${productId}')" style="
+                            padding: 8px 12px;
+                            background: linear-gradient(45deg, #ff4d4d, #d43f3f);
+                            border: none;
+                            border-radius: 6px;
+                            color: white;
+                            font-size: 0.85rem;
+                            cursor: pointer;
+                        ">Удалить</button>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+        });
+        
+        content.innerHTML = html;
+        
+    } catch (error) {
+        console.error("Ошибка загрузки фото-менеджера:", error);
+        content.innerHTML = `
+            <div style="text-align:center;color:#ff4d4d;padding:20px;">
+                Ошибка загрузки
+            </div>
+        `;
+    }
+}
+
+function uploadProductPhoto(productId) {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/jpeg,image/png';
+    input.style.display = 'none';
+    
+    input.onchange = async (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+        
+        // Валидация
+        const validTypes = ['image/jpeg', 'image/png'];
+        const maxSize = 5 * 1024 * 1024;
+        
+        if (!validTypes.includes(file.type)) {
+            showNotification('Формат файла должен быть JPG или PNG', 'error');
+            return;
+        }
+        
+        if (file.size > maxSize) {
+            showNotification('Размер файла не должен превышать 5MB', 'error');
+            return;
+        }
+        
+        showNotification('⏳ Загрузка фотографии...', 'info', 5000);
+        
+        // Читаем файл как Data URL
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            try {
+                // Сохраняем в Firebase как строку base64
+                await database.ref('products/' + productId + '/photoUrl').set(e.target.result);
+                
+                showNotification('✅ Фотография загружена!', 'success');
+                loadPhotoManager();
+                
+                // Обновляем отображение товара
+                const productItem = document.querySelector(`.product-item[data-id="${productId}"]`);
+                if (productItem) {
+                    const photoDiv = productItem.querySelector('.product-photo');
+                    if (photoDiv) {
+                        photoDiv.innerHTML = `<img src="${e.target.result}" alt="${productItem.dataset.name || 'Товар'}">`;
+                    }
+                }
+                
+            } catch (error) {
+                console.error("Ошибка загрузки фото:", error);
+                showNotification('❌ Ошибка загрузки фотографии', 'error');
+            }
+        };
+        
+        reader.readAsDataURL(file);
+    };
+    
+    document.body.appendChild(input);
+    input.click();
+    document.body.removeChild(input);
+}
+
+async function removeProductPhoto(productId) {
+    if (!confirm('Удалить фотографию товара?')) return;
+    
+    try {
+        await database.ref('products/' + productId + '/photoUrl').remove();
+        showNotification('✅ Фотография удалена', 'success');
+        loadPhotoManager();
+        
+        // Обновляем отображение товара
+        const productItem = document.querySelector(`.product-item[data-id="${productId}"]`);
+        if (productItem) {
+            const photoDiv = productItem.querySelector('.product-photo');
+            if (photoDiv) {
+                photoDiv.innerHTML = '<div class="photo-placeholder">📷</div>';
+            }
+        }
+        
+    } catch (error) {
+        console.error("Ошибка удаления фото:", error);
+        showNotification('❌ Ошибка удаления фотографии', 'error');
+    }
+}
+
 // ====================== ПРОСТАЯ СИСТЕМА ПАРОЛЯ 2610K ======================
 function login() {
     const password = document.getElementById('adminPassword').value;
@@ -1379,7 +1905,7 @@ function login() {
     }
     
     if (password === "2610K") {
-        localStorage.setItem('smoke_admin', 'true');
+        localStorage.setItem('isterika_admin', 'true');
         document.getElementById('loginBtn').style.display = 'none';
         document.getElementById('adminBtn').style.display = 'block';
         hideLoginForm();
@@ -1393,7 +1919,7 @@ function login() {
 
 function logout() {
     if (confirm('Вы уверены, что хотите выйти?')) {
-        localStorage.removeItem('smoke_admin');
+        localStorage.removeItem('isterika_admin');
         document.getElementById('loginBtn').style.display = 'block';
         document.getElementById('adminBtn').style.display = 'none';
         document.getElementById('adminPanel').style.display = 'none';
@@ -1404,7 +1930,7 @@ function logout() {
 }
 
 function checkAuth() {
-    if (localStorage.getItem('smoke_admin') === 'true') {
+    if (localStorage.getItem('isterika_admin') === 'true') {
         document.getElementById('loginBtn').style.display = 'none';
         document.getElementById('adminBtn').style.display = 'block';
     }
@@ -1501,18 +2027,13 @@ function createProductElement(product, productId) {
     div.className = 'product-item';
     div.dataset.id = productId;
     div.dataset.category = product.category || 'other';
+    div.dataset.name = product.name || '';
     
     const quantity = parseInt(product.quantity || 0);
     const quantityText = quantity === 0 ? 'Нет в наличии' : `Осталось: ${quantity} шт.`;
     const quantityClass = quantity === 0 ? 'quantity-badge out-of-stock' : 'quantity-badge';
     
     const category = product.category || 'other';
-    const categoryInfo = {
-        liquid: { name: "Жидкость", class: "category-liquid" },
-        pod: { name: "Под-система", class: "category-pod" },
-        snus: { name: "Снюс", class: "category-snus" },
-        other: { name: "Расходник", class: "category-other" }
-    }[category] || { name: "Расходник", class: "category-other" };
     
     const originalPrice = parseFloat(product.price || 0);
     let finalPrice = originalPrice;
@@ -1529,17 +2050,32 @@ function createProductElement(product, productId) {
         finalPrice = Math.max(0, finalPrice);
     }
     
-    const categoryDiv = document.createElement('div');
-    categoryDiv.className = `product-category ${categoryInfo.class}`;
-    categoryDiv.textContent = categoryInfo.name;
+    // Фотография товара
+    const photoDiv = document.createElement('div');
+    photoDiv.className = 'product-photo';
+    
+    if (product.photoUrl && product.photoUrl !== '') {
+        const img = document.createElement('img');
+        img.src = product.photoUrl;
+        img.alt = product.name || 'Товар';
+        photoDiv.appendChild(img);
+    } else {
+        photoDiv.innerHTML = '<div class="photo-placeholder">📷</div>';
+    }
     
     const contentDiv = document.createElement('div');
     contentDiv.className = 'product-content';
     
+    // Название (без категории)
     const nameDiv = document.createElement('div');
     nameDiv.className = 'product-name';
     nameDiv.textContent = product.name || 'Без названия';
     
+    // Декоративный разделитель
+    const dividerDiv = document.createElement('div');
+    dividerDiv.className = 'content-divider';
+    
+    // Вкус/Описание (без рамки)
     const flavorDiv = document.createElement('div');
     flavorDiv.className = 'product-flavor';
     
@@ -1554,6 +2090,7 @@ function createProductElement(product, productId) {
             flavorDiv.textContent = product.flavor || 'Вкус не указан';
     }
     
+    // Цена
     const priceDiv = document.createElement('div');
     priceDiv.className = 'product-price';
     
@@ -1584,10 +2121,12 @@ function createProductElement(product, productId) {
         priceDiv.appendChild(priceSpan);
     }
     
+    // Остаток - БЕЛЫЙ, ЖИРНЫЙ, БЕЗ РАМКИ
     const quantityDiv = document.createElement('div');
     quantityDiv.className = quantityClass;
     quantityDiv.textContent = quantityText;
     
+    // Кнопка покупки
     const buyBtn = document.createElement('button');
     buyBtn.className = 'buy-btn';
     buyBtn.onclick = (e) => {
@@ -1597,13 +2136,16 @@ function createProductElement(product, productId) {
     buyBtn.textContent = quantity === 0 ? 'НЕТ В НАЛИЧИИ' : 'КУПИТЬ';
     if (quantity === 0) buyBtn.disabled = true;
     
+    // Сборка контента (без категории)
     contentDiv.appendChild(nameDiv);
+    contentDiv.appendChild(dividerDiv);
     contentDiv.appendChild(flavorDiv);
     contentDiv.appendChild(priceDiv);
     contentDiv.appendChild(quantityDiv);
     contentDiv.appendChild(buyBtn);
     
-    div.appendChild(categoryDiv);
+    // Сборка всей карточки
+    div.appendChild(photoDiv);
     div.appendChild(contentDiv);
     
     return div;
@@ -1860,21 +2402,35 @@ async function addProduct() {
         newProduct.discountType = discountType;
     }
     
-    database.ref('products').push(newProduct)
-        .then(() => {
+    // Если есть фото, добавляем его
+    if (currentPhotoFile) {
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            newProduct.photoUrl = e.target.result;
+            await saveProduct(newProduct);
+        };
+        reader.readAsDataURL(currentPhotoFile);
+    } else {
+        await saveProduct(newProduct);
+    }
+    
+    async function saveProduct(productData) {
+        try {
+            await database.ref('products').push(productData);
             closeAddModal();
             showNotification('✅ Товар успешно добавлен!', 'success');
             filterProducts(currentFilter);
-        })
-        .catch((error) => {
+        } catch (error) {
             console.error("Ошибка добавления:", error);
             showNotification('❌ Ошибка добавления товара', 'error');
-        })
-        .finally(() => {
+        } finally {
             submitBtn.textContent = originalText;
             submitBtn.disabled = false;
             isOperationInProgress = false;
-        });
+            currentPhotoFile = null;
+            addZoomLevel = 1;
+        }
+    }
 }
 
 function closeAddModal() {
@@ -1886,6 +2442,11 @@ function closeAddModal() {
     });
     document.getElementById('productCategory').selectedIndex = 0;
     document.getElementById('discountType').selectedIndex = 0;
+    document.getElementById('addPhotoPreviewContainer').innerHTML = '<div class="photo-placeholder-icon">📷</div>';
+    document.getElementById('addPhotoError').style.display = 'none';
+    document.getElementById('addZoomControls').style.display = 'none';
+    currentPhotoFile = null;
+    addZoomLevel = 1;
 }
 
 function showAddModal() {
@@ -1976,6 +2537,20 @@ async function handleProductEdit(product) {
         const discountTypeSelect = document.getElementById('editDiscountType');
         discountTypeSelect.value = productData.discountType || 'percent';
         
+        // Загрузка фото
+        const photoPreviewContainer = document.getElementById('editPhotoPreviewContainer');
+        if (productData.photoUrl && productData.photoUrl !== '') {
+            photoPreviewContainer.innerHTML = `<img src="${productData.photoUrl}" class="photo-preview" id="editPhotoPreview" style="transform: scale(${editZoomLevel})">`;
+            document.getElementById('editZoomControls').style.display = 'flex';
+            document.getElementById('editZoomValue').textContent = Math.round(editZoomLevel * 100) + '%';
+        } else {
+            photoPreviewContainer.innerHTML = '<div class="photo-placeholder-icon">📷</div>';
+            document.getElementById('editZoomControls').style.display = 'none';
+        }
+        
+        currentEditPhotoFile = null;
+        editZoomLevel = 1;
+        
         document.getElementById('overlay').style.display = 'block';
         document.getElementById('editModal').style.display = 'block';
         
@@ -2064,26 +2639,42 @@ async function saveProductEdit() {
         updatedProduct.discountType = null;
     }
     
-    database.ref('products/' + currentProductId).update(updatedProduct)
-        .then(() => {
+    // Если есть новое фото, добавляем его
+    if (currentEditPhotoFile) {
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            updatedProduct.photoUrl = e.target.result;
+            await updateProduct(updatedProduct);
+        };
+        reader.readAsDataURL(currentEditPhotoFile);
+    } else {
+        await updateProduct(updatedProduct);
+    }
+    
+    async function updateProduct(productData) {
+        try {
+            await database.ref('products/' + currentProductId).update(productData);
             closeEditModal();
             showNotification('✅ Товар успешно обновлен!', 'success');
-        })
-        .catch((error) => {
+        } catch (error) {
             console.error("Ошибка обновления:", error);
             showNotification('❌ Ошибка обновления товара', 'error');
-        })
-        .finally(() => {
+        } finally {
             submitBtn.textContent = originalText;
             submitBtn.disabled = false;
             isOperationInProgress = false;
-        });
+            currentEditPhotoFile = null;
+            editZoomLevel = 1;
+        }
+    }
 }
 
 function closeEditModal() {
     document.getElementById('overlay').style.display = 'none';
     document.getElementById('editModal').style.display = 'none';
     currentProductId = null;
+    currentEditPhotoFile = null;
+    editZoomLevel = 1;
 }
 
 // ====================== ПОКУПКА ======================
@@ -2282,11 +2873,16 @@ function closeAllModals() {
     document.getElementById('statsModal').style.display = 'none';
     document.getElementById('backupModal').style.display = 'none';
     document.getElementById('backupMenuModal').style.display = 'none';
+    document.getElementById('photoModal').style.display = 'none';
     productToDelete = null;
     currentProductId = null;
+    currentPhotoFile = null;
+    currentEditPhotoFile = null;
+    addZoomLevel = 1;
+    editZoomLevel = 1;
 }
 
-// ====================== РЕЗЕРВНОЕ КОПИРОВАНИЕ ======================
+// ====================== РЕЗЕРВНОЕ КОПИРОВАНИЕ (без Экспорт/Импорт) ======================
 async function createBackup() {
     try {
         const snapshot = await database.ref('products').once('value');
@@ -2302,7 +2898,7 @@ async function createBackup() {
         };
         
         // Сохраняем в локальное хранилище (последние 5 копий)
-        const backups = JSON.parse(localStorage.getItem('smoke_backups') || '[]');
+        const backups = JSON.parse(localStorage.getItem('isterika_backups') || '[]');
         backups.unshift(backupData);
         
         // Ограничиваем количество сохраненных копий
@@ -2310,7 +2906,7 @@ async function createBackup() {
             backups.pop();
         }
         
-        localStorage.setItem('smoke_backups', JSON.stringify(backups));
+        localStorage.setItem('isterika_backups', JSON.stringify(backups));
         
         console.log('✅ Резервная копия создана:', backupData.count, 'товаров');
         return backupData;
@@ -2321,130 +2917,7 @@ async function createBackup() {
     }
 }
 
-// ====================== ЭКСПОРТ ТОВАРОВ ======================
-async function exportProducts() {
-    try {
-        const snapshot = await database.ref('products').once('value');
-        const products = snapshot.val();
-        
-        if (!products) {
-            showNotification('❌ Нет товаров для экспорта', 'error');
-            return;
-        }
-        
-        // Создаем структуру для экспорта
-        const exportData = {
-            metadata: {
-                version: '1.0',
-                exportDate: new Date().toISOString(),
-                totalProducts: Object.keys(products).length,
-                shopName: 'SMOKE магазин'
-            },
-            products: products
-        };
-        
-        const dataStr = JSON.stringify(exportData, null, 2);
-        const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-        
-        const exportFileDefaultName = `smoke-shop-backup-${new Date().toISOString().split('T')[0]}.json`;
-        
-        const linkElement = document.createElement('a');
-        linkElement.setAttribute('href', dataUri);
-        linkElement.setAttribute('download', exportFileDefaultName);
-        linkElement.click();
-        
-        showNotification(`✅ Экспортировано ${Object.keys(products).length} товаров`, 'success', 3000);
-        
-    } catch (error) {
-        console.error("Ошибка экспорта:", error);
-        showNotification('❌ Ошибка экспорта товаров', 'error');
-    }
-}
-
-// ====================== ИМПОРТ ТОВАРОВ ======================
-function importProducts() {
-    // Создаем скрытый input для выбора файла
-    const fileInput = document.createElement('input');
-    fileInput.type = 'file';
-    fileInput.accept = '.json';
-    fileInput.style.display = 'none';
-    
-    fileInput.onchange = async (event) => {
-        const file = event.target.files[0];
-        if (!file) return;
-        
-        const reader = new FileReader();
-        
-        reader.onload = async (e) => {
-            try {
-                const content = e.target.result;
-                const importData = JSON.parse(content);
-                
-                // Проверяем структуру файла
-                if (!importData.products) {
-                    showNotification('❌ Неверный формат файла импорта', 'error');
-                    return;
-                }
-                
-                // Показываем подтверждение
-                const productCount = Object.keys(importData.products).length;
-                
-                if (!confirm(`Импортировать ${productCount} товаров?\n\n⚠️ Внимание: существующие товары будут перезаписаны!`)) {
-                    return;
-                }
-                
-                showNotification(`⏳ Импорт ${productCount} товаров...`, 'info', 5000);
-                
-                // Импортируем каждый товар
-                let importedCount = 0;
-                let errorCount = 0;
-                
-                for (const [productId, productData] of Object.entries(importData.products)) {
-                    try {
-                        // Проверяем обязательные поля
-                        if (!productData.name || !productData.category || !productData.price) {
-                            console.warn('Пропущен товар без обязательных полей:', productId);
-                            errorCount++;
-                            continue;
-                        }
-                        
-                        // Добавляем дату импорта
-                        productData.importedAt = Date.now();
-                        
-                        // Сохраняем в Firebase
-                        await database.ref('products/' + productId).set(productData);
-                        importedCount++;
-                        
-                    } catch (error) {
-                        console.error('Ошибка импорта товара:', productId, error);
-                        errorCount++;
-                    }
-                }
-                
-                showNotification(`✅ Импорт завершен!\nУспешно: ${importedCount}, Ошибок: ${errorCount}`, 'success', 5000);
-                
-                // Перезагружаем товары
-                filterProducts(currentFilter);
-                
-            } catch (error) {
-                console.error("Ошибка парсинга файла:", error);
-                showNotification('❌ Ошибка чтения файла импорта', 'error');
-            }
-        };
-        
-        reader.onerror = () => {
-            showNotification('❌ Ошибка чтения файла', 'error');
-        };
-        
-        reader.readAsText(file);
-    };
-    
-    document.body.appendChild(fileInput);
-    fileInput.click();
-    document.body.removeChild(fileInput);
-}
-
-// ====================== УПРАВЛЕНИЕ РЕЗЕРВНЫМИ КОПИЯМИ ======================
+// ====================== УПРАВЛЕНИЕ РЕЗЕРВНЫМИ КОПИЯМИ (без Экспорт/Импорт) ======================
 function showBackupMenu() {
     document.getElementById('overlay').style.display = 'block';
     document.getElementById('backupMenuModal').style.display = 'block';
@@ -2469,7 +2942,7 @@ function closeBackupModal() {
 }
 
 function loadBackupList() {
-    const backups = JSON.parse(localStorage.getItem('smoke_backups') || '[]');
+    const backups = JSON.parse(localStorage.getItem('isterika_backups') || '[]');
     const backupList = document.getElementById('backupList');
     
     if (backups.length === 0) {
@@ -2539,7 +3012,7 @@ async function createManualBackup() {
 }
 
 async function restoreBackup(index) {
-    const backups = JSON.parse(localStorage.getItem('smoke_backups') || '[]');
+    const backups = JSON.parse(localStorage.getItem('isterika_backups') || '[]');
     if (!backups[index]) return;
     
     const backup = backups[index];
@@ -2569,7 +3042,7 @@ async function restoreBackup(index) {
 }
 
 function exportBackup(index) {
-    const backups = JSON.parse(localStorage.getItem('smoke_backups') || '[]');
+    const backups = JSON.parse(localStorage.getItem('isterika_backups') || '[]');
     if (!backups[index]) return;
     
     const backup = backups[index];
@@ -2577,7 +3050,7 @@ function exportBackup(index) {
     const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
     
     const date = new Date(backup.timestamp);
-    const fileName = `smoke-restore-${date.toISOString().split('T')[0]}.json`;
+    const fileName = `isterika-restore-${date.toISOString().split('T')[0]}.json`;
     
     const linkElement = document.createElement('a');
     linkElement.setAttribute('href', dataUri);
