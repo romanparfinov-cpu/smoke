@@ -7,6 +7,7 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 <style>
+
 /* БАЗОВЫЕ СТИЛИ */
 body {
     margin: 0;
@@ -1328,7 +1329,7 @@ function closeNotification() {
     document.getElementById('notification').style.display = 'none';
 }
 
-// ====================== ПРОСТАЯ СИСТЕМА ПАРОЛЯ 2610K ======================
+// пароль
 function login() {
     const password = document.getElementById('adminPassword').value;
     
@@ -1337,7 +1338,7 @@ function login() {
         return;
     }
     
-    if (password === "2610K") {
+    if (password === "K26R10S06") {
         localStorage.setItem('isterika_admin', 'true');
         document.getElementById('loginBtn').style.display = 'none';
         document.getElementById('adminBtn').style.display = 'block';
