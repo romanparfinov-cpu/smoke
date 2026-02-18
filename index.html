@@ -7,7 +7,6 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 <style>
-
 /* БАЗОВЫЕ СТИЛИ */
 body {
     margin: 0;
@@ -133,7 +132,7 @@ body {
     border-radius: 2px;
 }
 
-/* КНОПКА ФИЛЬТРАЦИИ */
+/* КНОПКИ ФИЛЬТРАЦИИ */
 .filter-container {
     display: flex;
     justify-content: center;
@@ -273,6 +272,14 @@ body {
     border: none;
     box-shadow: none;
     min-height: 1.3em;
+}
+
+/* КРЕПОСТЬ - белый жирный шрифт, чуть меньше названия */
+.product-strength {
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 0.9rem;
+    margin: 2px 0;
 }
 
 /* ЦЕНА */
@@ -613,7 +620,7 @@ body {
     border-radius: 20px;
     padding: 25px 20px;
     z-index: 2000;
-    width: min(380px, 90vw);
+    width: min(420px, 95vw);
     display: none;
     backdrop-filter: blur(25px);
     border: 1px solid rgba(157, 78, 221, 0.3);
@@ -665,6 +672,11 @@ body {
 .modal-input-container select option {
     background: #1a1a2e;
     color: #fff;
+}
+
+/* Выпадающий список для названий */
+.name-select {
+    margin-bottom: 8px;
 }
 
 /* Поле скидки */
@@ -1142,13 +1154,7 @@ body {
     <h3>Добавить товар</h3>
     
     <div class="modal-input-container">
-        <input type="text" id="productName" placeholder="Название товара" required>
-    </div>
-    <div class="modal-input-container">
-        <input type="text" id="productFlavor" placeholder="Вкус/Бренд/Тип" required>
-    </div>
-    <div class="modal-input-container">
-        <select id="productCategory" required onchange="updateFlavorPlaceholder()">
+        <select id="productCategory" required onchange="updateAddForm()">
             <option value="" disabled selected>Выберите категорию</option>
             <option value="liquid">Жидкость</option>
             <option value="pod">Под-система</option>
@@ -1156,12 +1162,33 @@ body {
             <option value="other">Расходник</option>
         </select>
     </div>
+    
+    <div class="modal-input-container name-select" id="nameSelectContainer" style="display:none;">
+        <select id="productNameSelect" onchange="updateNameFromSelect()">
+            <option value="" selected>Выберите название</option>
+        </select>
+    </div>
+    
+    <div class="modal-input-container">
+        <input type="text" id="productName" placeholder="Название товара (или введите вручную)" required>
+    </div>
+    
+    <div class="modal-input-container">
+        <input type="text" id="productFlavor" placeholder="Вкус/Бренд/Тип" required>
+    </div>
+    
+    <div class="modal-input-container" id="strengthContainer">
+        <input type="text" id="productStrength" placeholder="Крепость">
+    </div>
+    
     <div class="modal-input-container">
         <input type="number" id="productPrice" placeholder="Цена (BYN)" min="0" step="0.01" required>
     </div>
+    
     <div class="discount-container">
         <input type="number" class="discount-input" id="productDiscount" placeholder="Скидка в BYN" min="0" step="0.01">
     </div>
+    
     <div class="modal-input-container">
         <select id="productQuantity" required>
             <option value="" disabled selected>Выберите наличие</option>
@@ -1174,6 +1201,7 @@ body {
             <option value="reserved">Забронировано</option>
         </select>
     </div>
+    
     <div class="modal-buttons">
         <button class="confirm-modal-btn" onclick="addProduct()">Добавить</button>
         <button class="cancel-modal-btn" onclick="closeAddModal()">Отмена</button>
@@ -1185,25 +1213,40 @@ body {
     <h3>Редактировать товар</h3>
     
     <div class="modal-input-container">
-        <input type="text" id="editProductName" placeholder="Название товара" required>
-    </div>
-    <div class="modal-input-container">
-        <input type="text" id="editProductFlavor" placeholder="Вкус/Бренд/Тип" required>
-    </div>
-    <div class="modal-input-container">
-        <select id="editProductCategory" required onchange="updateEditFlavorPlaceholder()">
+        <select id="editProductCategory" required onchange="updateEditForm()">
             <option value="liquid">Жидкость</option>
             <option value="pod">Под-система</option>
             <option value="snus">Снюс</option>
             <option value="other">Расходник</option>
         </select>
     </div>
+    
+    <div class="modal-input-container name-select" id="editNameSelectContainer" style="display:none;">
+        <select id="editProductNameSelect" onchange="updateEditNameFromSelect()">
+            <option value="" selected>Выберите название</option>
+        </select>
+    </div>
+    
+    <div class="modal-input-container">
+        <input type="text" id="editProductName" placeholder="Название товара" required>
+    </div>
+    
+    <div class="modal-input-container">
+        <input type="text" id="editProductFlavor" placeholder="Вкус/Бренд/Тип" required>
+    </div>
+    
+    <div class="modal-input-container" id="editStrengthContainer">
+        <input type="text" id="editProductStrength" placeholder="Крепость">
+    </div>
+    
     <div class="modal-input-container">
         <input type="number" id="editProductPrice" placeholder="Цена (BYN)" min="0" step="0.01" required>
     </div>
+    
     <div class="discount-container">
         <input type="number" class="discount-input" id="editProductDiscount" placeholder="Скидка в BYN" min="0" step="0.01">
     </div>
+    
     <div class="modal-input-container">
         <select id="editProductQuantity" required>
             <option value="" disabled selected>Выберите наличие</option>
@@ -1216,6 +1259,7 @@ body {
             <option value="reserved">Забронировано</option>
         </select>
     </div>
+    
     <div class="modal-buttons">
         <button class="confirm-modal-btn" onclick="saveProductEdit()">Сохранить</button>
         <button class="cancel-modal-btn" onclick="closeEditModal()">Отмена</button>
@@ -1298,6 +1342,24 @@ body {
     <button class="filter-btn" onclick="filterProducts('other')">Расходники</button>
 </div>
 
+<!-- Дополнительный фильтр по названиям (появляется при выборе категории) -->
+<div class="filter-container" id="nameFilterContainer" style="display:none; padding-top:0;">
+    <select id="nameFilter" onchange="filterByName()" style="
+        padding: 8px 16px;
+        border: 1.5px solid rgba(157, 78, 221, 0.4);
+        border-radius: 20px;
+        background: rgba(20, 15, 45, 0.8);
+        color: #fff;
+        font-weight: 600;
+        font-size: 0.85rem;
+        backdrop-filter: blur(10px);
+        width: 100%;
+        max-width: 300px;
+    ">
+        <option value="">Весь товар</option>
+    </select>
+</div>
+
 <!-- Товары -->
 <div class="products" id="productsContainer">
     <div style="grid-column:1/-1; padding: 30px; color: #aaa; font-size: 0.95rem;" id="loadingText">
@@ -1328,8 +1390,52 @@ let productToDelete = null;
 let currentProductId = null;
 let orderText = '';
 let currentFilter = 'all';
+let currentNameFilter = '';
 let productsRef = null;
 let isOperationInProgress = false;
+
+// Предустановленные названия по категориям
+const presetNames = {
+    liquid: [
+        "ISTERIKA ГРЕХ",
+        "ГРЕХ",
+        "ISTERIKA MIX",
+        "МОНАШКА HOTSPOT",
+        "ЗЛАЯ МОНАШКА",
+        "ЗЛАЯ МОНАШКА ICE",
+        "ЗЛАЯ МОНАШКА SOUR",
+        "CATSWILL EXTRA"
+    ],
+    pod: [
+        "XROS 5",
+        "XROS 5 MINI",
+        "XROS CUBE",
+        "BRUSKO APX C1"
+    ],
+    snus: [
+        "PODONKI SLICK",
+        "ICEBERG",
+        "ISTERIKA МОНАШКА",
+        "FAFF",
+        "ZUZU",
+        "DRYMOST",
+        "ODENS",
+        "D.L.T.A"
+    ],
+    other: [] // Расходники - только ручной ввод
+};
+
+// Предустановленная крепость
+function getPresetStrength(name) {
+    if (name.includes("ЗЛАЯ МОНАШКА") || name === "МОНАШКА HOTSPOT") {
+        return "70mg";
+    } else if (presetNames.liquid.includes(name)) {
+        return "60mg";
+    } else if (presetNames.snus.includes(name)) {
+        return "60mg";
+    }
+    return "";
+}
 
 // ====================== УВЕДОМЛЕНИЯ ======================
 function showNotification(message, type = 'info', duration = 3000) {
@@ -1414,6 +1520,160 @@ function toggleAdminPanel() {
     panel.style.display = isVisible ? 'none' : 'block';
 }
 
+// ====================== ФУНКЦИИ ДЛЯ ФОРМЫ ДОБАВЛЕНИЯ ======================
+function updateAddForm() {
+    const category = document.getElementById('productCategory').value;
+    const nameSelectContainer = document.getElementById('nameSelectContainer');
+    const nameSelect = document.getElementById('productNameSelect');
+    const nameInput = document.getElementById('productName');
+    const flavorInput = document.getElementById('productFlavor');
+    const strengthContainer = document.getElementById('strengthContainer');
+    
+    // Обновляем плейсхолдер для вкуса/описания
+    switch(category) {
+        case 'pod':
+            flavorInput.placeholder = 'Описание';
+            break;
+        case 'other':
+            flavorInput.placeholder = 'Тип';
+            break;
+        default:
+            flavorInput.placeholder = 'Вкус/Описание';
+    }
+    
+    // Показываем/скрываем выпадающий список названий
+    if (category && presetNames[category] && presetNames[category].length > 0) {
+        nameSelect.innerHTML = '<option value="">Выберите название</option>';
+        presetNames[category].forEach(name => {
+            const option = document.createElement('option');
+            option.value = name;
+            option.textContent = name;
+            nameSelect.appendChild(option);
+        });
+        nameSelectContainer.style.display = 'block';
+        
+        // Показываем поле крепости для жидкостей и снюса
+        if (category === 'liquid' || category === 'snus') {
+            strengthContainer.style.display = 'block';
+        } else {
+            // Для под-систем скрываем поле крепости
+            strengthContainer.style.display = 'none';
+            document.getElementById('productStrength').value = '';
+        }
+    } else {
+        nameSelectContainer.style.display = 'none';
+        // Для расходников скрываем поле крепости
+        if (category === 'other') {
+            strengthContainer.style.display = 'none';
+            document.getElementById('productStrength').value = '';
+        } else if (category === 'pod') {
+            strengthContainer.style.display = 'none';
+            document.getElementById('productStrength').value = '';
+        } else {
+            strengthContainer.style.display = 'block';
+        }
+    }
+    
+    // Очищаем поля
+    nameInput.value = '';
+    flavorInput.value = '';
+}
+
+function updateNameFromSelect() {
+    const category = document.getElementById('productCategory').value;
+    const selectedName = document.getElementById('productNameSelect').value;
+    const nameInput = document.getElementById('productName');
+    const strengthInput = document.getElementById('productStrength');
+    
+    if (selectedName) {
+        nameInput.value = selectedName;
+        
+        // Автоматически устанавливаем крепость для предустановленных названий (только для жидкостей и снюса)
+        if (category === 'liquid' || category === 'snus') {
+            const presetStrength = getPresetStrength(selectedName);
+            if (presetStrength) {
+                strengthInput.value = presetStrength;
+            } else {
+                strengthInput.value = '';
+            }
+        }
+    }
+}
+
+// ====================== ФУНКЦИИ ДЛЯ ФОРМЫ РЕДАКТИРОВАНИЯ ======================
+function updateEditForm() {
+    const category = document.getElementById('editProductCategory').value;
+    const nameSelectContainer = document.getElementById('editNameSelectContainer');
+    const nameSelect = document.getElementById('editProductNameSelect');
+    const nameInput = document.getElementById('editProductName');
+    const flavorInput = document.getElementById('editProductFlavor');
+    const strengthContainer = document.getElementById('editStrengthContainer');
+    
+    // Обновляем плейсхолдер для вкуса/описания
+    switch(category) {
+        case 'pod':
+            flavorInput.placeholder = 'Описание';
+            break;
+        case 'other':
+            flavorInput.placeholder = 'Тип';
+            break;
+        default:
+            flavorInput.placeholder = 'Вкус/Описание';
+    }
+    
+    // Показываем/скрываем выпадающий список названий
+    if (category && presetNames[category] && presetNames[category].length > 0) {
+        nameSelect.innerHTML = '<option value="">Выберите название</option>';
+        presetNames[category].forEach(name => {
+            const option = document.createElement('option');
+            option.value = name;
+            option.textContent = name;
+            nameSelect.appendChild(option);
+        });
+        nameSelectContainer.style.display = 'block';
+        
+        // Показываем поле крепости для жидкостей и снюса
+        if (category === 'liquid' || category === 'snus') {
+            strengthContainer.style.display = 'block';
+        } else {
+            // Для под-систем скрываем поле крепости
+            strengthContainer.style.display = 'none';
+            document.getElementById('editProductStrength').value = '';
+        }
+    } else {
+        nameSelectContainer.style.display = 'none';
+        // Для расходников скрываем поле крепости
+        if (category === 'other') {
+            strengthContainer.style.display = 'none';
+            document.getElementById('editProductStrength').value = '';
+        } else if (category === 'pod') {
+            strengthContainer.style.display = 'none';
+            document.getElementById('editProductStrength').value = '';
+        } else {
+            strengthContainer.style.display = 'block';
+        }
+    }
+}
+
+function updateEditNameFromSelect() {
+    const category = document.getElementById('editProductCategory').value;
+    const selectedName = document.getElementById('editProductNameSelect').value;
+    const nameInput = document.getElementById('editProductName');
+    const strengthInput = document.getElementById('editProductStrength');
+    
+    if (selectedName) {
+        nameInput.value = selectedName;
+        
+        // Автоматически устанавливаем крепость для предустановленных названий (только для жидкостей и снюса)
+        if (category === 'liquid' || category === 'snus') {
+            const presetStrength = getPresetStrength(selectedName);
+            if (presetStrength) {
+                strengthInput.value = presetStrength;
+            }
+        }
+    }
+}
+
 // ====================== FIREBASE ФУНКЦИИ ======================
 function loadProducts() {
     try {
@@ -1434,6 +1694,7 @@ function loadProducts() {
                 }));
                 
                 displayProducts(productsArray);
+                updateNameFilter(productsArray);
             } else {
                 container.innerHTML = 
                     '<div style="grid-column:1/-1;color:#aaa;padding:30px;font-size:0.95rem;text-align:center;">Товаров пока нет<br><small style="font-size:0.85rem;">Добавьте первый товар через админ-панель</small></div>';
@@ -1447,13 +1708,41 @@ function loadProducts() {
     }
 }
 
+function updateNameFilter(productsArray) {
+    const nameFilter = document.getElementById('nameFilter');
+    const currentProducts = currentFilter === 'all' 
+        ? productsArray 
+        : productsArray.filter(p => p.category === currentFilter);
+    
+    // Получаем уникальные названия
+    const uniqueNames = [...new Set(currentProducts.map(p => p.name).filter(Boolean))];
+    
+    nameFilter.innerHTML = '<option value="">Весь товар</option>';
+    uniqueNames.sort().forEach(name => {
+        const option = document.createElement('option');
+        option.value = name;
+        option.textContent = name;
+        nameFilter.appendChild(option);
+    });
+    
+    // Показываем фильтр по названиям, если есть товары в категории
+    document.getElementById('nameFilterContainer').style.display = 
+        uniqueNames.length > 0 ? 'flex' : 'none';
+}
+
 function displayProducts(productsArray) {
     const container = document.getElementById('productsContainer');
     container.innerHTML = '';
     
-    const filteredProducts = currentFilter === 'all' 
+    // Сначала фильтруем по основной категории
+    let filteredProducts = currentFilter === 'all' 
         ? productsArray 
         : productsArray.filter(product => product.category === currentFilter);
+    
+    // Затем фильтруем по названию, если выбрано
+    if (currentNameFilter) {
+        filteredProducts = filteredProducts.filter(product => product.name === currentNameFilter);
+    }
     
     if (filteredProducts.length === 0) {
         container.innerHTML = 
@@ -1543,6 +1832,14 @@ function createProductElement(product, productId) {
             flavorDiv.textContent = product.flavor || 'Вкус не указан';
     }
     
+    // Крепость (только для жидкостей и снюса)
+    if (product.strength && (category === 'liquid' || category === 'snus')) {
+        const strengthDiv = document.createElement('div');
+        strengthDiv.className = 'product-strength';
+        strengthDiv.textContent = `Крепость: ${product.strength}`;
+        contentDiv.appendChild(strengthDiv);
+    }
+    
     // Цена
     const priceDiv = document.createElement('div');
     priceDiv.className = 'product-price';
@@ -1607,35 +1904,49 @@ function createProductElement(product, productId) {
     return div;
 }
 
-function updateFlavorPlaceholder() {
-    const category = document.getElementById('productCategory').value;
-    const input = document.getElementById('productFlavor');
+// ====================== ФИЛЬТРАЦИЯ ======================
+function filterProducts(category) {
+    currentFilter = category;
+    currentNameFilter = '';
     
-    switch(category) {
-        case 'pod':
-            input.placeholder = 'Описание';
-            break;
-        case 'other':
-            input.placeholder = 'Тип';
-            break;
-        default:
-            input.placeholder = 'Вкус/Описание';
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    event.target.classList.add('active');
+    
+    document.getElementById('nameFilter').value = '';
+    
+    if (productsRef) {
+        productsRef.once('value').then((snapshot) => {
+            const products = snapshot.val();
+            if (products) {
+                const productsArray = Object.keys(products).map(productId => ({
+                    id: productId,
+                    ...products[productId]
+                }));
+                displayProducts(productsArray);
+                updateNameFilter(productsArray);
+            }
+        });
     }
 }
 
-function updateEditFlavorPlaceholder() {
-    const category = document.getElementById('editProductCategory').value;
-    const input = document.getElementById('editProductFlavor');
+function filterByName() {
+    const nameFilter = document.getElementById('nameFilter');
+    currentNameFilter = nameFilter.value;
     
-    switch(category) {
-        case 'pod':
-            input.placeholder = 'Описание';
-            break;
-        case 'other':
-            input.placeholder = 'Тип';
-            break;
-        default:
-            input.placeholder = 'Вкус/Описание';
+    if (productsRef) {
+        productsRef.once('value').then((snapshot) => {
+            const products = snapshot.val();
+            if (products) {
+                const productsArray = Object.keys(products).map(productId => ({
+                    id: productId,
+                    ...products[productId]
+                }));
+                displayProducts(productsArray);
+            }
+        });
     }
 }
 
@@ -1795,6 +2106,7 @@ async function addProduct() {
     const name = document.getElementById('productName').value.trim();
     const flavor = document.getElementById('productFlavor').value.trim();
     const category = document.getElementById('productCategory').value;
+    const strength = document.getElementById('productStrength').value.trim();
     const priceInput = document.getElementById('productPrice').value;
     const discountInput = document.getElementById('productDiscount').value;
     const quantity = document.getElementById('productQuantity').value;
@@ -1855,6 +2167,10 @@ async function addProduct() {
         createdAt: Date.now()
     };
     
+    if (strength && (category === 'liquid' || category === 'snus')) {
+        newProduct.strength = strength;
+    }
+    
     if (discount > 0) {
         newProduct.discount = discount;
     }
@@ -1878,42 +2194,30 @@ function closeAddModal() {
     document.getElementById('overlay').style.display = 'none';
     document.getElementById('addModal').style.display = 'none';
     
-    ['productName', 'productFlavor', 'productPrice', 'productDiscount'].forEach(id => {
+    ['productName', 'productFlavor', 'productStrength', 'productPrice', 'productDiscount'].forEach(id => {
         document.getElementById(id).value = '';
     });
     document.getElementById('productCategory').selectedIndex = 0;
     document.getElementById('productQuantity').selectedIndex = 0;
+    document.getElementById('nameSelectContainer').style.display = 'none';
+    document.getElementById('strengthContainer').style.display = 'block';
 }
 
 function showAddModal() {
     document.getElementById('overlay').style.display = 'block';
     document.getElementById('addModal').style.display = 'block';
     document.getElementById('adminPanel').style.display = 'none';
-    updateFlavorPlaceholder();
-}
-
-// ====================== ФИЛЬТРАЦИЯ ======================
-function filterProducts(category) {
-    currentFilter = category;
     
-    document.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.classList.remove('active');
-    });
-    
-    event.target.classList.add('active');
-    
-    if (productsRef) {
-        productsRef.once('value').then((snapshot) => {
-            const products = snapshot.val();
-            if (products) {
-                const productsArray = Object.keys(products).map(productId => ({
-                    id: productId,
-                    ...products[productId]
-                }));
-                displayProducts(productsArray);
-            }
-        });
-    }
+    // Сбрасываем форму
+    document.getElementById('productCategory').selectedIndex = 0;
+    document.getElementById('productName').value = '';
+    document.getElementById('productFlavor').value = '';
+    document.getElementById('productStrength').value = '';
+    document.getElementById('productPrice').value = '';
+    document.getElementById('productDiscount').value = '';
+    document.getElementById('productQuantity').selectedIndex = 0;
+    document.getElementById('nameSelectContainer').style.display = 'none';
+    document.getElementById('strengthContainer').style.display = 'block';
 }
 
 // ====================== РЕДАКТИРОВАНИЕ ======================
@@ -1962,6 +2266,7 @@ async function handleProductEdit(product) {
         
         document.getElementById('editProductName').value = productData.name || '';
         document.getElementById('editProductFlavor').value = productData.flavor || '';
+        document.getElementById('editProductStrength').value = productData.strength || '';
         document.getElementById('editProductPrice').value = productData.price || '';
         document.getElementById('editProductDiscount').value = productData.discount || '';
         
@@ -1971,7 +2276,7 @@ async function handleProductEdit(product) {
         const quantitySelect = document.getElementById('editProductQuantity');
         quantitySelect.value = productData.quantity || '0';
         
-        updateEditFlavorPlaceholder();
+        updateEditForm();
         
         document.getElementById('overlay').style.display = 'block';
         document.getElementById('editModal').style.display = 'block';
@@ -1991,6 +2296,7 @@ async function saveProductEdit() {
     const name = document.getElementById('editProductName').value.trim();
     const flavor = document.getElementById('editProductFlavor').value.trim();
     const category = document.getElementById('editProductCategory').value;
+    const strength = document.getElementById('editProductStrength').value.trim();
     const priceInput = document.getElementById('editProductPrice').value;
     const discountInput = document.getElementById('editProductDiscount').value;
     const quantity = document.getElementById('editProductQuantity').value;
@@ -2045,6 +2351,12 @@ async function saveProductEdit() {
         quantity: quantity,
         updatedAt: Date.now()
     };
+    
+    if (strength && (category === 'liquid' || category === 'snus')) {
+        updatedProduct.strength = strength;
+    } else {
+        updatedProduct.strength = null;
+    }
     
     if (discount > 0) {
         updatedProduct.discount = discount;
@@ -2108,6 +2420,10 @@ async function showBuyModal(productId, category) {
             orderText += `Тип: ${product.flavor}\n`;
         } else {
             orderText += `Вкус: ${product.flavor}\n`;
+        }
+        
+        if (product.strength && (product.category === 'liquid' || product.category === 'snus')) {
+            orderText += `Крепость: ${product.strength}\n`;
         }
         
         if (product.discount && product.discount > 0) {
@@ -2262,6 +2578,7 @@ function closeAllModals() {
     document.getElementById('buyModal').style.display = 'none';
     document.getElementById('loginForm').style.display = 'none';
     document.getElementById('statsModal').style.display = 'none';
+    document.getElementById('adminPanel').style.display = 'none';
     productToDelete = null;
     currentProductId = null;
 }
@@ -2274,7 +2591,6 @@ window.addEventListener('DOMContentLoaded', function() {
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
             closeAllModals();
-            document.getElementById('adminPanel').style.display = 'none';
         }
     });
     
