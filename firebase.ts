@@ -54,8 +54,13 @@ export const db = getFirestore(app);
 
 export const SUPER_ADMIN_EMAIL = 'romanparfinov@gmail.com';
 
-// Sign in with Google (Uses Popup for seamless mobile & desktop auth without page redirects)
-export const loginWithGoogle = async (): Promise<User | null> => {
+// Sign in with Google (Uses Popup by default, or Redirect as fallback for mobile browsers)
+export const loginWithGoogle = async (useRedirect = false): Promise<User | null> => {
+  if (useRedirect) {
+    await signInWithRedirect(auth, googleProvider);
+    return null;
+  }
+
   try {
     const result = await signInWithPopup(auth, googleProvider);
     try {
@@ -67,29 +72,22 @@ export const loginWithGoogle = async (): Promise<User | null> => {
   } catch (popupErr: any) {
     console.warn('Google Auth Popup notice:', popupErr);
 
-    if (popupErr?.code === 'auth/unauthorized-domain') {
+    const code = popupErr?.code || '';
+    const message = popupErr?.message || '';
+
+    if (code === 'auth/unauthorized-domain' || message === 'UNAUTHORIZED_DOMAIN') {
       throw new Error('UNAUTHORIZED_DOMAIN');
     }
-    if (popupErr?.code === 'auth/popup-closed-by-user') {
-      throw popupErr;
-    }
+
     if (
-      popupErr?.code === 'auth/popup-blocked' || 
-      popupErr?.code === 'auth/operation-not-supported-in-this-environment'
+      code === 'auth/popup-blocked' ||
+      code === 'auth/operation-not-supported-in-this-environment' ||
+      code === 'auth/cancelled-popup-request'
     ) {
       throw new Error('POPUP_BLOCKED');
     }
-    
-    // Fallback attempt with redirect only if popup is completely unsupported
-    try {
-      await signInWithRedirect(auth, googleProvider);
-      return null;
-    } catch (redirectErr: any) {
-      if (redirectErr?.code === 'auth/unauthorized-domain') {
-        throw new Error('UNAUTHORIZED_DOMAIN');
-      }
-      throw redirectErr;
-    }
+
+    throw popupErr;
   }
 };
 
