@@ -17,52 +17,36 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   showToast,
 }) => {
   const [loading, setLoading] = useState(false);
-  const [redirecting, setRedirecting] = useState(false);
   const [domainError, setDomainError] = useState<string | null>(null);
-  const [popupBlocked, setPopupBlocked] = useState(false);
-  const [errorDetails, setErrorDetails] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
   const currentDomain = typeof window !== 'undefined' ? window.location.hostname : '';
 
-  const handleGoogleLogin = async (useRedirect = false) => {
-    if (useRedirect) {
-      setRedirecting(true);
-    } else {
-      setLoading(true);
-    }
+  const handleGoogleLogin = async () => {
+    setLoading(true);
     setDomainError(null);
-    setPopupBlocked(false);
-    setErrorDetails(null);
-
     try {
-      const user = await loginWithGoogle(useRedirect);
+      const user = await loginWithGoogle();
       if (user) {
         showToast('Успешный вход через Google!', 'success');
         onSuccess();
         onClose();
       }
     } catch (err: any) {
-      console.warn('Google auth modal catch:', err);
-      const code = err?.code || '';
-      const msg = err?.message || String(err || '');
-
-      if (msg === 'UNAUTHORIZED_DOMAIN' || code === 'auth/unauthorized-domain') {
+      if (err?.message === 'UNAUTHORIZED_DOMAIN' || err?.code === 'auth/unauthorized-domain') {
         setDomainError(currentDomain);
         showToast(`Домен ${currentDomain} не добавлен в Authorized Domains в Firebase Console`, 'error');
-      } else if (msg === 'POPUP_BLOCKED' || code === 'auth/popup-blocked') {
-        setPopupBlocked(true);
-        showToast('Всплывающее окно заблокировано мобильным браузером', 'warning');
-      } else if (code === 'auth/popup-closed-by-user') {
-        showToast('Окно входа зарыто', 'info');
+      } else if (err?.message === 'TELEGRAM_WEBVIEW_BLOCKED') {
+        showToast('Google блокирует вход во встроенном браузере Telegram. Откройте в обычном браузере!', 'warning');
+      } else if (err?.code === 'auth/popup-closed-by-user') {
+        console.warn('Google Auth popup closed by user');
       } else {
-        setErrorDetails(code ? `${code}: ${msg}` : msg);
-        showToast('Ошибка при входе через Google', 'error');
+        console.error('Google Auth Error:', err);
+        showToast('Ошибка входа через Google. Попробуйте еще раз', 'error');
       }
     } finally {
       setLoading(false);
-      setRedirecting(false);
     }
   };
 
@@ -90,7 +74,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         </div>
 
         {/* Main Content */}
-        <div className="space-y-4">
+        <div className="space-y-5">
           <div className="bg-zinc-950 border border-zinc-800/80 rounded-2xl p-4 text-xs text-zinc-300 space-y-2">
             <div className="flex items-center gap-2 text-emerald-400 font-semibold">
               <CheckCircle2 className="w-4 h-4 shrink-0" />
@@ -108,7 +92,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 <span>Домен не авторизован в Firebase</span>
               </div>
               <p className="leading-relaxed text-rose-300/90">
-                Текущий домен <code className="bg-black/40 px-1.5 py-0.5 rounded text-amber-300 font-mono">{domainError}</code> не внесен в список разрешенных доменов вашего Firebase проекта.
+                Текущий домен <code className="bg-black/40 px-1.5 py-0.5 rounded text-amber-300 font-mono">{domainError}</code> не внесен в список разрешенных доменов вашeго Firebase проекта.
               </p>
               <div className="pt-1 text-[11px] text-zinc-300 space-y-1 bg-black/30 p-2.5 rounded-xl border border-rose-500/20 font-mono">
                 <p className="font-semibold text-amber-400">Как исправить:</p>
@@ -118,41 +102,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             </div>
           )}
 
-          {popupBlocked && (
-            <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 text-xs text-amber-200 space-y-2 animate-fade-in">
-              <div className="flex items-center gap-2 font-bold text-amber-400">
-                <AlertTriangle className="w-4 h-4 shrink-0" />
-                <span>Окно авторизации заблокировано</span>
-              </div>
-              <p className="leading-relaxed text-amber-200/90">
-                Мобильный браузер заблокировал всплывающее окно. Попробуйте войти через прямое перенаправление:
-              </p>
-              <button
-                onClick={() => handleGoogleLogin(true)}
-                disabled={redirecting}
-                className="w-full mt-1 py-2 px-3 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 font-medium rounded-xl transition-colors text-xs flex items-center justify-center gap-2"
-              >
-                <span>{redirecting ? 'Перенаправление...' : 'Войти через перенаправление (Redirect)'}</span>
-              </button>
-            </div>
-          )}
-
-          {errorDetails && (
-            <div className="bg-zinc-800/80 border border-zinc-700/80 rounded-2xl p-3 text-xs text-zinc-300 space-y-1 animate-fade-in">
-              <div className="text-amber-400 font-semibold flex items-center gap-1.5">
-                <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
-                <span>Детали ошибки:</span>
-              </div>
-              <code className="block bg-black/50 p-2 rounded-lg text-[11px] font-mono text-zinc-300 break-all">
-                {errorDetails}
-              </code>
-            </div>
-          )}
-
-          {/* Primary Google Login Button */}
+          {/* Google Login Button */}
           <button
-            onClick={() => handleGoogleLogin(false)}
-            disabled={loading || redirecting}
+            onClick={handleGoogleLogin}
+            disabled={loading}
             className="w-full py-3.5 px-4 rounded-2xl bg-zinc-800 hover:bg-zinc-700 text-white font-semibold text-sm transition-all border border-zinc-700 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl active:scale-[0.99] disabled:opacity-50"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -174,15 +127,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
               />
             </svg>
             <span>{loading ? 'Подключение к Google...' : 'Войти через Google'}</span>
-          </button>
-
-          {/* Alternative mode if needed */}
-          <button
-            onClick={() => handleGoogleLogin(true)}
-            disabled={loading || redirecting}
-            className="w-full py-2 px-3 text-xs text-zinc-400 hover:text-zinc-200 transition-colors text-center"
-          >
-            Не открывается окно? Войти с перенаправлением ➔
           </button>
         </div>
 
