@@ -1,6 +1,0 @@
-{
-  "name": "ISTERIKA - Vape Catalog",
-  "description": "Премиальный каталог вейп-продукции ISTERIKA в стиле Elegant Dark",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}
