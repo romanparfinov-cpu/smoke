@@ -23,27 +23,29 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
   const currentDomain = typeof window !== 'undefined' ? window.location.hostname : '';
 
-  const handleGoogleLogin = async () => {
+  const handleGoogleLogin = async (forceRedirect = false) => {
     setLoading(true);
     setDomainError(null);
+
     try {
-      const user = await loginWithGoogle();
+      const user = await loginWithGoogle(forceRedirect);
       if (user) {
         showToast('Успешный вход через Google!', 'success');
         onSuccess();
         onClose();
       }
     } catch (err: any) {
-      if (err?.message === 'UNAUTHORIZED_DOMAIN' || err?.code === 'auth/unauthorized-domain') {
+      console.warn('Google auth modal catch:', err);
+      const code = err?.code || '';
+      const msg = err?.message || String(err || '');
+
+      if (msg === 'UNAUTHORIZED_DOMAIN' || code === 'auth/unauthorized-domain') {
         setDomainError(currentDomain);
         showToast(`Домен ${currentDomain} не добавлен в Authorized Domains в Firebase Console`, 'error');
-      } else if (err?.message === 'TELEGRAM_WEBVIEW_BLOCKED') {
-        showToast('Google блокирует вход во встроенном браузере Telegram. Откройте в обычном браузере!', 'warning');
-      } else if (err?.code === 'auth/popup-closed-by-user') {
-        console.warn('Google Auth popup closed by user');
+      } else if (code === 'auth/popup-closed-by-user') {
+        // User closed popup
       } else {
-        console.error('Google Auth Error:', err);
-        showToast('Ошибка входа через Google. Попробуйте еще раз', 'error');
+        showToast('Ошибка при входе через Google. Попробуйте ещё раз', 'error');
       }
     } finally {
       setLoading(false);
@@ -74,7 +76,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         </div>
 
         {/* Main Content */}
-        <div className="space-y-5">
+        <div className="space-y-4">
           <div className="bg-zinc-950 border border-zinc-800/80 rounded-2xl p-4 text-xs text-zinc-300 space-y-2">
             <div className="flex items-center gap-2 text-emerald-400 font-semibold">
               <CheckCircle2 className="w-4 h-4 shrink-0" />
@@ -92,7 +94,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 <span>Домен не авторизован в Firebase</span>
               </div>
               <p className="leading-relaxed text-rose-300/90">
-                Текущий домен <code className="bg-black/40 px-1.5 py-0.5 rounded text-amber-300 font-mono">{domainError}</code> не внесен в список разрешенных доменов вашeго Firebase проекта.
+                Текущий домен <code className="bg-black/40 px-1.5 py-0.5 rounded text-amber-300 font-mono">{domainError}</code> не внесен в список разрешенных доменов вашего Firebase проекта.
               </p>
               <div className="pt-1 text-[11px] text-zinc-300 space-y-1 bg-black/30 p-2.5 rounded-xl border border-rose-500/20 font-mono">
                 <p className="font-semibold text-amber-400">Как исправить:</p>
@@ -102,9 +104,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             </div>
           )}
 
-          {/* Google Login Button */}
+          {/* Primary Google Login Button */}
           <button
-            onClick={handleGoogleLogin}
+            onClick={() => handleGoogleLogin(false)}
             disabled={loading}
             className="w-full py-3.5 px-4 rounded-2xl bg-zinc-800 hover:bg-zinc-700 text-white font-semibold text-sm transition-all border border-zinc-700 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl active:scale-[0.99] disabled:opacity-50"
           >

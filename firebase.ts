@@ -54,37 +54,11 @@ export const db = getFirestore(app);
 
 export const SUPER_ADMIN_EMAIL = 'romanparfinov@gmail.com';
 
-// Sign in with Google (Supports both Popup & Redirect for Telegram WebApp / WebViews)
-export const loginWithGoogle = async (): Promise<User | null> => {
-  const isTelegram = /Telegram/i.test(navigator.userAgent) || !!(window as any).Telegram?.WebApp;
-  const isRestrictedWebView = isTelegram || /FBAN|FBAV|Instagram|Line|MicroMessenger|wv/i.test(navigator.userAgent);
-  
-  if (isRestrictedWebView) {
-    try {
-      const result = await signInWithPopup(auth, googleProvider);
-      try {
-        await syncUserProfile(result.user);
-      } catch (sErr) {
-        console.warn('Sync profile notice during popup login:', sErr);
-      }
-      return result.user;
-    } catch (popupErr: any) {
-      if (popupErr?.code === 'auth/unauthorized-domain') {
-        throw new Error('UNAUTHORIZED_DOMAIN');
-      }
-      try {
-        await signInWithRedirect(auth, googleProvider);
-        return null;
-      } catch (redirectErr: any) {
-        if (redirectErr?.code === 'auth/unauthorized-domain') {
-          throw new Error('UNAUTHORIZED_DOMAIN');
-        }
-        if (isTelegram) {
-          throw new Error('TELEGRAM_WEBVIEW_BLOCKED');
-        }
-        throw redirectErr;
-      }
-    }
+// Sign in with Google (Tries Popup first, falls back to Redirect automatically on mobile/blocked popups)
+export const loginWithGoogle = async (forceRedirect = false): Promise<User | null> => {
+  if (forceRedirect) {
+    await signInWithRedirect(auth, googleProvider);
+    return null;
   }
 
   try {
@@ -92,28 +66,33 @@ export const loginWithGoogle = async (): Promise<User | null> => {
     try {
       await syncUserProfile(result.user);
     } catch (sErr) {
-      console.warn('Sync profile notice during login:', sErr);
+      console.warn('Sync profile notice during popup login:', sErr);
     }
     return result.user;
   } catch (popupErr: any) {
-    if (popupErr?.code === 'auth/unauthorized-domain') {
+    console.warn('Google Auth Popup notice:', popupErr);
+
+    const code = popupErr?.code || '';
+    const message = popupErr?.message || '';
+
+    if (code === 'auth/unauthorized-domain' || message === 'UNAUTHORIZED_DOMAIN') {
       throw new Error('UNAUTHORIZED_DOMAIN');
     }
-    if (
-      popupErr?.code === 'auth/popup-blocked' || 
-      popupErr?.code === 'auth/operation-not-supported-in-this-environment'
-    ) {
-      try {
-        await signInWithRedirect(auth, googleProvider);
-        return null;
-      } catch (redirectErr: any) {
-        if (redirectErr?.code === 'auth/unauthorized-domain') {
-          throw new Error('UNAUTHORIZED_DOMAIN');
-        }
-        throw redirectErr;
-      }
+
+    if (code === 'auth/popup-closed-by-user') {
+      return null;
     }
-    throw popupErr;
+
+    // Auto fallback to redirect if popup is blocked or unsupported
+    try {
+      await signInWithRedirect(auth, googleProvider);
+      return null;
+    } catch (redirectErr: any) {
+      if (redirectErr?.code === 'auth/unauthorized-domain') {
+        throw new Error('UNAUTHORIZED_DOMAIN');
+      }
+      throw redirectErr;
+    }
   }
 };
 
