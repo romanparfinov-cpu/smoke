@@ -54,66 +54,42 @@ export const db = getFirestore(app);
 
 export const SUPER_ADMIN_EMAIL = 'romanparfinov@gmail.com';
 
-// Sign in with Google (Supports both Popup & Redirect for Telegram WebApp / WebViews)
+// Sign in with Google (Uses Popup for seamless mobile & desktop auth without page redirects)
 export const loginWithGoogle = async (): Promise<User | null> => {
-  const isTelegram = /Telegram/i.test(navigator.userAgent) || !!(window as any).Telegram?.WebApp;
-  const isRestrictedWebView = isTelegram || /FBAN|FBAV|Instagram|Line|MicroMessenger|wv/i.test(navigator.userAgent);
-  
-  if (isRestrictedWebView) {
-    try {
-      const result = await signInWithPopup(auth, googleProvider);
-      try {
-        await syncUserProfile(result.user);
-      } catch (sErr) {
-        console.warn('Sync profile notice during popup login:', sErr);
-      }
-      return result.user;
-    } catch (popupErr: any) {
-      if (popupErr?.code === 'auth/unauthorized-domain') {
-        throw new Error('UNAUTHORIZED_DOMAIN');
-      }
-      try {
-        await signInWithRedirect(auth, googleProvider);
-        return null;
-      } catch (redirectErr: any) {
-        if (redirectErr?.code === 'auth/unauthorized-domain') {
-          throw new Error('UNAUTHORIZED_DOMAIN');
-        }
-        if (isTelegram) {
-          throw new Error('TELEGRAM_WEBVIEW_BLOCKED');
-        }
-        throw redirectErr;
-      }
-    }
-  }
-
   try {
     const result = await signInWithPopup(auth, googleProvider);
     try {
       await syncUserProfile(result.user);
     } catch (sErr) {
-      console.warn('Sync profile notice during login:', sErr);
+      console.warn('Sync profile notice during popup login:', sErr);
     }
     return result.user;
   } catch (popupErr: any) {
+    console.warn('Google Auth Popup notice:', popupErr);
+
     if (popupErr?.code === 'auth/unauthorized-domain') {
       throw new Error('UNAUTHORIZED_DOMAIN');
+    }
+    if (popupErr?.code === 'auth/popup-closed-by-user') {
+      throw popupErr;
     }
     if (
       popupErr?.code === 'auth/popup-blocked' || 
       popupErr?.code === 'auth/operation-not-supported-in-this-environment'
     ) {
-      try {
-        await signInWithRedirect(auth, googleProvider);
-        return null;
-      } catch (redirectErr: any) {
-        if (redirectErr?.code === 'auth/unauthorized-domain') {
-          throw new Error('UNAUTHORIZED_DOMAIN');
-        }
-        throw redirectErr;
-      }
+      throw new Error('POPUP_BLOCKED');
     }
-    throw popupErr;
+    
+    // Fallback attempt with redirect only if popup is completely unsupported
+    try {
+      await signInWithRedirect(auth, googleProvider);
+      return null;
+    } catch (redirectErr: any) {
+      if (redirectErr?.code === 'auth/unauthorized-domain') {
+        throw new Error('UNAUTHORIZED_DOMAIN');
+      }
+      throw redirectErr;
+    }
   }
 };
 

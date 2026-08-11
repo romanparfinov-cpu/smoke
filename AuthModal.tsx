@@ -18,6 +18,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 }) => {
   const [loading, setLoading] = useState(false);
   const [domainError, setDomainError] = useState<string | null>(null);
+  const [popupBlocked, setPopupBlocked] = useState(false);
 
   if (!isOpen) return null;
 
@@ -26,6 +27,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   const handleGoogleLogin = async () => {
     setLoading(true);
     setDomainError(null);
+    setPopupBlocked(false);
     try {
       const user = await loginWithGoogle();
       if (user) {
@@ -37,6 +39,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       if (err?.message === 'UNAUTHORIZED_DOMAIN' || err?.code === 'auth/unauthorized-domain') {
         setDomainError(currentDomain);
         showToast(`Домен ${currentDomain} не добавлен в Authorized Domains в Firebase Console`, 'error');
+      } else if (err?.message === 'POPUP_BLOCKED' || err?.code === 'auth/popup-blocked') {
+        setPopupBlocked(true);
+        showToast('Браузер заблокировал окно входа. Нажмите еще раз!', 'warning');
       } else if (err?.message === 'TELEGRAM_WEBVIEW_BLOCKED') {
         showToast('Google блокирует вход во встроенном браузере Telegram. Откройте в обычном браузере!', 'warning');
       } else if (err?.code === 'auth/popup-closed-by-user') {
@@ -99,6 +104,18 @@ export const AuthModal: React.FC<AuthModalProps> = ({
                 <p>1. Перейдите в Firebase Console ➞ Authentication ➞ Settings ➞ Authorized Domains</p>
                 <p>2. Нажмите «Add Domain» и добавьте: <span className="text-emerald-400 font-bold">{domainError}</span></p>
               </div>
+            </div>
+          )}
+
+          {popupBlocked && (
+            <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 text-xs text-amber-200 space-y-2 animate-fade-in">
+              <div className="flex items-center gap-2 font-bold text-amber-400">
+                <AlertTriangle className="w-4 h-4 shrink-0" />
+                <span>Всплывающее окно заблокировано</span>
+              </div>
+              <p className="leading-relaxed text-amber-200/90">
+                Мобильный браузер заблокировал всплывающее окно авторизации. Пожалуйста, разрешите всплывающие окна в настройках браузера или нажмите кнопку «Войти через Google» повторно.
+              </p>
             </div>
           )}
 
