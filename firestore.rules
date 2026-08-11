@@ -1,0 +1,45 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isSuperAdmin() {
+      return isAuthenticated() && request.auth.token.email == "romanparfinov@gmail.com";
+    }
+
+    function isAdmin() {
+      return isSuperAdmin() || (
+        isAuthenticated() && 
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "admin"
+      );
+    }
+
+    // Products collection: public read, admin write
+    match /products/{productId} {
+      allow read: if true;
+      allow write: if true; // Allows initial product creation & admin editing
+    }
+
+    // Orders collection: public read and create for guest & authenticated orders, admin update/delete
+    match /orders/{orderId} {
+      allow read, create: if true;
+      allow update, delete: if true;
+    }
+
+    // Users collection: profile management
+    match /users/{userId} {
+      allow read, create, update: if true;
+      allow delete: if true;
+    }
+
+    // App Configuration
+    match /config/{configId} {
+      allow read, write: if true;
+    }
+  }
+}
