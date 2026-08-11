@@ -102,8 +102,9 @@ export interface UserProfile {
   email: string;
   displayName: string;
   photoURL?: string;
+  telegramUsername?: string;
   role: 'admin' | 'user';
-  isBlocked: boolean;
+  isBlocked?: boolean;
   createdAt: string;
   lastLoginAt: string;
 }

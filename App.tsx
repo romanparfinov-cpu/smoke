@@ -10,6 +10,7 @@ import {
   generateOrderNumber, 
   fetchAppConfig,
   checkRedirectResult,
+  getLocalGuestProfile,
   SUPER_ADMIN_EMAIL
 } from './firebase';
 import { Product, Flavor, Category, UserProfile, AppConfig, CATEGORY_LABELS } from './types';
@@ -21,6 +22,7 @@ import { AdminPanel } from './components/AdminPanel';
 import { Toast } from './components/Toast';
 import { ConfirmationModal } from './components/ConfirmationModal';
 import { UserOrdersModal } from './components/UserOrdersModal';
+import { AuthModal } from './components/AuthModal';
 
 export default function App() {
   // Auth state
@@ -31,8 +33,23 @@ export default function App() {
   // App Config (Telegram username)
   const [appConfig, setAppConfig] = useState<AppConfig>({ telegramUsername: 'isterika_vape_manager' });
 
-  // Catalog state
-  const [products, setProducts] = useState<Product[]>([]);
+  // Catalog state with instant localStorage caching for 0ms load time
+  const [products, setProducts] = useState<Product[]>(() => {
+    try {
+      const cached = localStorage.getItem('isterika_cached_products');
+      return cached ? JSON.parse(cached) : [];
+    } catch (e) {
+      return [];
+    }
+  });
+  const [productsLoading, setProductsLoading] = useState<boolean>(() => {
+    try {
+      const cached = localStorage.getItem('isterika_cached_products');
+      return !cached || JSON.parse(cached).length === 0;
+    } catch (e) {
+      return true;
+    }
+  });
   const [selectedCategory, setSelectedCategory] = useState<Category | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -41,6 +58,9 @@ export default function App() {
 
   // User Orders History modal state
   const [showUserOrders, setShowUserOrders] = useState(false);
+
+  // Login Modal state
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   // Active Order Modal state
   const [activeOrder, setActiveOrder] = useState<{
@@ -101,9 +121,12 @@ export default function App() {
           setUserProfile(profile);
         } catch (error) {
           console.error('Error syncing user profile:', error);
+          const guest = getLocalGuestProfile();
+          if (guest) setUserProfile(guest);
         }
       } else {
-        setUserProfile(null);
+        const guest = getLocalGuestProfile();
+        setUserProfile(guest);
       }
       setAuthLoading(false);
     });
@@ -115,6 +138,7 @@ export default function App() {
   useEffect(() => {
     const unsubscribe = subscribeToProducts((fetchedProducts) => {
       setProducts(fetchedProducts);
+      setProductsLoading(false);
     });
     return () => unsubscribe();
   }, []);
@@ -133,12 +157,28 @@ export default function App() {
   // Handle Google Login
   const handleLogin = async () => {
     try {
-      await loginWithGoogle();
-      showToast('Успешный вход через Google!', 'success');
+      const user = await loginWithGoogle();
+      if (user) {
+        showToast('Успешный вход через Google!', 'success');
+      }
     } catch (error: any) {
       console.error('Login error:', error);
-      if (error?.code !== 'auth/popup-closed-by-user') {
-        showToast('Ошибка при входе через Google. Попробуйте еще раз.', 'error');
+      if (error?.message === 'UNAUTHORIZED_DOMAIN') {
+        showConfirm(
+          '⚠️ Домен Vercel не добавлен в Firebase',
+          `Для работы входа через Google добавьте домен вашей версии Vercel в настройки Firebase Console:\n\n1. Перейдите в Firebase Console -> Authentication -> Settings -> Authorized Domains\n2. Нажмите "Add Domain" и введите: ${window.location.hostname}`,
+          () => {},
+          false
+        );
+      } else if (error?.message === 'TELEGRAM_WEBVIEW_BLOCKED') {
+        showConfirm(
+          '⚠️ Вход через Google в Telegram',
+          'Google запрещает вход во встроенном браузере Telegram. Вы можете выбирать и заказываь товары без входа! Или откройте сайт в обычном браузере (Chrome / Safari) через меню Telegram (три точки -> Открыть в браузере).',
+          () => {},
+          false
+        );
+      } else if (error?.code !== 'auth/popup-closed-by-user') {
+        showToast('Ошибка при входе через Google. Проверьте подключение или домен Vercel.', 'error');
       }
     }
   };
@@ -174,9 +214,9 @@ export default function App() {
       category: product.category,
       flavorName: selectedFlavor.name,
       price: product.price,
-      userId: currentUser?.uid || '',
-      userEmail: currentUser?.email || '',
-      userName: currentUser?.displayName || '',
+      userId: currentUser?.uid || userProfile?.uid || '',
+      userEmail: currentUser?.email || userProfile?.email || '',
+      userName: currentUser?.displayName || userProfile?.displayName || '',
     }).catch((error) => {
       console.error('Error saving order to Firestore:', error);
     });
@@ -218,7 +258,7 @@ export default function App() {
       <Header
         user={userProfile}
         isAdmin={isAdmin}
-        onLogin={handleLogin}
+        onLogin={() => setShowAuthModal(true)}
         onLogout={handleLogout}
         showAdminPanel={showAdminPanel}
         onToggleAdminPanel={() => setShowAdminPanel(!showAdminPanel)}
@@ -257,6 +297,7 @@ export default function App() {
         {/* Product Grid (Strictly 2 cards per row on mobile screens) */}
         <ProductGrid
           products={filteredProducts}
+          loading={productsLoading}
           onOrder={handleOrder}
           isAdmin={isAdmin}
           onAddProduct={() => setShowAdminPanel(true)}
@@ -332,6 +373,18 @@ export default function App() {
           onClose={() => setToast(null)}
         />
       )}
+
+      {/* Auth Modal (Fast Guest Login or Google) */}
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        onSuccess={(guestProfile) => {
+          if (guestProfile) {
+            setUserProfile(guestProfile);
+          }
+        }}
+        showToast={showToast}
+      />
 
     </div>
   );

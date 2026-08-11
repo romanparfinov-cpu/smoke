@@ -5,6 +5,7 @@ import {
   signInWithPopup, 
   signInWithRedirect,
   getRedirectResult,
+  signInAnonymously,
   signOut, 
   onAuthStateChanged,
   User 
@@ -25,8 +26,18 @@ import {
   onSnapshot,
   serverTimestamp 
 } from 'firebase/firestore';
-import firebaseConfig from '../firebase-applet-config.json';
 import { Product, Order, UserProfile, AppConfig, OrderStatus } from './types';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyByOxuteEKwId8W85KLLn_gStv5ObV2zWM",
+  authDomain: "isterikaai.firebaseapp.com",
+  databaseURL: "https://isterikaai-default-rtdb.firebaseio.com",
+  projectId: "isterikaai",
+  storageBucket: "isterikaai.firebasestorage.app",
+  messagingSenderId: "285709727430",
+  appId: "1:285709727430:web:05542c9dbc2470d4b309c7",
+  measurementId: "G-9L6R6RMX2G"
+};
 
 // Initialize Firebase App
 const app = initializeApp(firebaseConfig);
@@ -35,27 +46,40 @@ const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
 googleProvider.setCustomParameters({
-  prompt: 'select_account' // Always prompt user to select account (no automatic instant auto-login)
+  prompt: 'select_account'
 });
 
 // Initialize Firestore
-const databaseId = firebaseConfig.firestoreDatabaseId || '(default)';
-export const db = databaseId === '(default)' || !databaseId 
-  ? getFirestore(app) 
-  : getFirestore(app, databaseId);
+export const db = getFirestore(app);
 
 export const SUPER_ADMIN_EMAIL = 'romanparfinov@gmail.com';
 
 // Sign in with Google (Supports both Popup & Redirect for Telegram WebApp / WebViews)
 export const loginWithGoogle = async (): Promise<User | null> => {
-  const isWebView = /Telegram|FBAN|FBAV|Instagram|Line|MicroMessenger|WebView|Android/i.test(navigator.userAgent) || !!(window as any).Telegram?.WebApp;
+  const isTelegram = /Telegram/i.test(navigator.userAgent) || !!(window as any).Telegram?.WebApp;
+  const isRestrictedWebView = isTelegram || /FBAN|FBAV|Instagram|Line|MicroMessenger|wv/i.test(navigator.userAgent);
   
-  if (isWebView) {
+  if (isRestrictedWebView) {
     try {
-      await signInWithRedirect(auth, googleProvider);
-      return null;
-    } catch (redirectErr) {
-      console.warn('Redirect auth failed, trying popup:', redirectErr);
+      const result = await signInWithPopup(auth, googleProvider);
+      await syncUserProfile(result.user);
+      return result.user;
+    } catch (popupErr: any) {
+      if (popupErr?.code === 'auth/unauthorized-domain') {
+        throw new Error('UNAUTHORIZED_DOMAIN');
+      }
+      try {
+        await signInWithRedirect(auth, googleProvider);
+        return null;
+      } catch (redirectErr: any) {
+        if (redirectErr?.code === 'auth/unauthorized-domain') {
+          throw new Error('UNAUTHORIZED_DOMAIN');
+        }
+        if (isTelegram) {
+          throw new Error('TELEGRAM_WEBVIEW_BLOCKED');
+        }
+        throw redirectErr;
+      }
     }
   }
 
@@ -64,14 +88,22 @@ export const loginWithGoogle = async (): Promise<User | null> => {
     await syncUserProfile(result.user);
     return result.user;
   } catch (popupErr: any) {
-    console.warn('Popup login failed, trying redirect:', popupErr);
+    if (popupErr?.code === 'auth/unauthorized-domain') {
+      throw new Error('UNAUTHORIZED_DOMAIN');
+    }
     if (
       popupErr?.code === 'auth/popup-blocked' || 
-      popupErr?.code === 'auth/popup-closed-by-user' ||
       popupErr?.code === 'auth/operation-not-supported-in-this-environment'
     ) {
-      await signInWithRedirect(auth, googleProvider);
-      return null;
+      try {
+        await signInWithRedirect(auth, googleProvider);
+        return null;
+      } catch (redirectErr: any) {
+        if (redirectErr?.code === 'auth/unauthorized-domain') {
+          throw new Error('UNAUTHORIZED_DOMAIN');
+        }
+        throw redirectErr;
+      }
     }
     throw popupErr;
   }
@@ -92,7 +124,85 @@ export const checkRedirectResult = async (): Promise<UserProfile | null> => {
 
 // Sign out
 export const logoutUser = async (): Promise<void> => {
-  await signOut(auth);
+  localStorage.removeItem('isterika_guest_profile');
+  try {
+    await signOut(auth);
+  } catch (e) {
+    console.warn('SignOut error:', e);
+  }
+};
+
+// Login as Guest / Anonymous User (Works on ANY domain without OAuth restriction)
+export const loginAsGuest = async (displayName?: string, telegramUsername?: string): Promise<UserProfile> => {
+  const name = displayName?.trim() || 'Покупатель';
+  const tg = telegramUsername?.replace(/^@/, '').trim() || '';
+
+  try {
+    const result = await signInAnonymously(auth);
+    const user = result.user;
+    const userRef = doc(db, 'users', user.uid);
+    const userSnap = await getDoc(userRef);
+
+    let profile: UserProfile;
+
+    if (userSnap.exists()) {
+      const existingData = userSnap.data() as UserProfile;
+      profile = {
+        ...existingData,
+        displayName: name || existingData.displayName,
+        telegramUsername: tg || existingData.telegramUsername,
+        lastLoginAt: new Date().toISOString(),
+      };
+      await updateDoc(userRef, {
+        displayName: profile.displayName,
+        telegramUsername: profile.telegramUsername,
+        lastLoginAt: profile.lastLoginAt,
+      });
+    } else {
+      profile = {
+        uid: user.uid,
+        email: '',
+        displayName: name,
+        photoURL: '',
+        role: 'user',
+        telegramUsername: tg,
+        createdAt: new Date().toISOString(),
+        lastLoginAt: new Date().toISOString(),
+      };
+      await setDoc(userRef, profile);
+    }
+    localStorage.setItem('isterika_guest_profile', JSON.stringify(profile));
+    return profile;
+  } catch (err) {
+    console.warn('Firebase anonymous auth failed, creating local guest session:', err);
+    let guestUid = localStorage.getItem('isterika_guest_uid');
+    if (!guestUid) {
+      guestUid = 'guest_' + Math.random().toString(36).substring(2, 9);
+      localStorage.setItem('isterika_guest_uid', guestUid);
+    }
+
+    const profile: UserProfile = {
+      uid: guestUid,
+      email: '',
+      displayName: name || `Покупатель #${guestUid.slice(-5)}`,
+      photoURL: '',
+      role: 'user',
+      telegramUsername: tg,
+      createdAt: new Date().toISOString(),
+      lastLoginAt: new Date().toISOString(),
+    };
+    localStorage.setItem('isterika_guest_profile', JSON.stringify(profile));
+    return profile;
+  }
+};
+
+export const getLocalGuestProfile = (): UserProfile | null => {
+  try {
+    const cached = localStorage.getItem('isterika_guest_profile');
+    return cached ? JSON.parse(cached) : null;
+  } catch (e) {
+    return null;
+  }
 };
 
 // Sync User Profile in Firestore
@@ -197,6 +307,11 @@ export const subscribeToProducts = (callback: (products: Product[]) => void) => 
     snapshot.forEach((docSnap) => {
       products.push({ id: docSnap.id, ...docSnap.data() } as Product);
     });
+    try {
+      localStorage.setItem('isterika_cached_products', JSON.stringify(products));
+    } catch (e) {
+      console.warn('LocalStorage save error:', e);
+    }
     callback(products);
   }, (error) => {
     console.error('Error subscribing to products:', error);

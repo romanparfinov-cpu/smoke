@@ -27,6 +27,14 @@
 4. **Framework Preset**: Выберите **Vite**.
 5. Нажмите **Deploy**.
 
+### Шаг 3. Включение входа Google для Vercel (Авторизованные домены)
+Чтобы авторизация Google работала на вашем домене Vercel:
+1. Зайдите в [Firebase Console](https://console.firebase.google.com/).
+2. Перейдите в раздел **Authentication** ➞ **Settings** ➞ **Authorized domains**.
+3. Нажмите **Add domain** и укажите домен вашего сайта на Vercel (например, `isterika-vape-store.vercel.app`).
+
+> ℹ️ **Примечание про Telegram**: Google соображениями безопасности блокирует OAuth-вход во встроенных вебвью Telegram (`disallowed_useragent`). Пользователи могут свободно оформлять заказы без входа, а для входа через Google достаточно открыть сайт в браузере (Chrome / Safari) через меню Telegram (три точки -> *Открыть в браузере*).
+
 ---
 
 ## 🛠 Локальная разработка
