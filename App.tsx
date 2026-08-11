@@ -10,7 +10,6 @@ import {
   generateOrderNumber, 
   fetchAppConfig,
   checkRedirectResult,
-  getLocalGuestProfile,
   SUPER_ADMIN_EMAIL
 } from './firebase';
 import { Product, Flavor, Category, UserProfile, AppConfig, CATEGORY_LABELS } from './types';
@@ -121,12 +120,9 @@ export default function App() {
           setUserProfile(profile);
         } catch (error) {
           console.error('Error syncing user profile:', error);
-          const guest = getLocalGuestProfile();
-          if (guest) setUserProfile(guest);
         }
       } else {
-        const guest = getLocalGuestProfile();
-        setUserProfile(guest);
+        setUserProfile(null);
       }
       setAuthLoading(false);
     });
@@ -162,8 +158,8 @@ export default function App() {
         showToast('Успешный вход через Google!', 'success');
       }
     } catch (error: any) {
-      console.error('Login error:', error);
-      if (error?.message === 'UNAUTHORIZED_DOMAIN') {
+      if (error?.message === 'UNAUTHORIZED_DOMAIN' || error?.code === 'auth/unauthorized-domain') {
+        console.warn('Login notice: UNAUTHORIZED_DOMAIN');
         showConfirm(
           '⚠️ Домен Vercel не добавлен в Firebase',
           `Для работы входа через Google добавьте домен вашей версии Vercel в настройки Firebase Console:\n\n1. Перейдите в Firebase Console -> Authentication -> Settings -> Authorized Domains\n2. Нажмите "Add Domain" и введите: ${window.location.hostname}`,
@@ -171,13 +167,17 @@ export default function App() {
           false
         );
       } else if (error?.message === 'TELEGRAM_WEBVIEW_BLOCKED') {
+        console.warn('Login notice: TELEGRAM_WEBVIEW_BLOCKED');
         showConfirm(
           '⚠️ Вход через Google в Telegram',
           'Google запрещает вход во встроенном браузере Telegram. Вы можете выбирать и заказываь товары без входа! Или откройте сайт в обычном браузере (Chrome / Safari) через меню Telegram (три точки -> Открыть в браузере).',
           () => {},
           false
         );
-      } else if (error?.code !== 'auth/popup-closed-by-user') {
+      } else if (error?.code === 'auth/popup-closed-by-user') {
+        console.warn('Login popup closed by user');
+      } else {
+        console.error('Login error:', error);
         showToast('Ошибка при входе через Google. Проверьте подключение или домен Vercel.', 'error');
       }
     }
@@ -374,15 +374,11 @@ export default function App() {
         />
       )}
 
-      {/* Auth Modal (Fast Guest Login or Google) */}
+      {/* Auth Modal (Google Login) */}
       <AuthModal
         isOpen={showAuthModal}
         onClose={() => setShowAuthModal(false)}
-        onSuccess={(guestProfile) => {
-          if (guestProfile) {
-            setUserProfile(guestProfile);
-          }
-        }}
+        onSuccess={() => setShowAuthModal(false)}
         showToast={showToast}
       />
 

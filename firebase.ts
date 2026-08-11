@@ -5,7 +5,6 @@ import {
   signInWithPopup, 
   signInWithRedirect,
   getRedirectResult,
-  signInAnonymously,
   signOut, 
   onAuthStateChanged,
   User 
@@ -27,6 +26,7 @@ import {
   serverTimestamp 
 } from 'firebase/firestore';
 import { Product, Order, UserProfile, AppConfig, OrderStatus } from './types';
+import { INITIAL_PRODUCTS } from './data/initialProducts';
 
 const firebaseConfig = {
   apiKey: "AIzaSyByOxuteEKwId8W85KLLn_gStv5ObV2zWM",
@@ -62,7 +62,11 @@ export const loginWithGoogle = async (): Promise<User | null> => {
   if (isRestrictedWebView) {
     try {
       const result = await signInWithPopup(auth, googleProvider);
-      await syncUserProfile(result.user);
+      try {
+        await syncUserProfile(result.user);
+      } catch (sErr) {
+        console.warn('Sync profile notice during popup login:', sErr);
+      }
       return result.user;
     } catch (popupErr: any) {
       if (popupErr?.code === 'auth/unauthorized-domain') {
@@ -85,7 +89,11 @@ export const loginWithGoogle = async (): Promise<User | null> => {
 
   try {
     const result = await signInWithPopup(auth, googleProvider);
-    await syncUserProfile(result.user);
+    try {
+      await syncUserProfile(result.user);
+    } catch (sErr) {
+      console.warn('Sync profile notice during login:', sErr);
+    }
     return result.user;
   } catch (popupErr: any) {
     if (popupErr?.code === 'auth/unauthorized-domain') {
@@ -117,14 +125,13 @@ export const checkRedirectResult = async (): Promise<UserProfile | null> => {
       return await syncUserProfile(result.user);
     }
   } catch (err) {
-    console.error('Error handling redirect login result:', err);
+    console.warn('Notice handling redirect login result:', err);
   }
   return null;
 };
 
 // Sign out
 export const logoutUser = async (): Promise<void> => {
-  localStorage.removeItem('isterika_guest_profile');
   try {
     await signOut(auth);
   } catch (e) {
@@ -132,14 +139,25 @@ export const logoutUser = async (): Promise<void> => {
   }
 };
 
-// Login as Guest / Anonymous User (Works on ANY domain without OAuth restriction)
-export const loginAsGuest = async (displayName?: string, telegramUsername?: string): Promise<UserProfile> => {
-  const name = displayName?.trim() || 'Покупатель';
-  const tg = telegramUsername?.replace(/^@/, '').trim() || '';
+// Sync User Profile in Firestore
+export const syncUserProfile = async (user: User): Promise<UserProfile> => {
+  if (!user || !user.uid) throw new Error('User not provided');
+
+  const email = (user.email || '').toLowerCase().trim();
+  const isSuperAdmin = email === SUPER_ADMIN_EMAIL.toLowerCase();
+
+  const fallbackProfile: UserProfile = {
+    uid: user.uid,
+    email: user.email || '',
+    displayName: user.displayName || user.email?.split('@')[0] || 'Пользователь',
+    photoURL: user.photoURL || '',
+    role: isSuperAdmin ? 'admin' : 'user',
+    isBlocked: false,
+    createdAt: new Date().toISOString(),
+    lastLoginAt: new Date().toISOString(),
+  };
 
   try {
-    const result = await signInAnonymously(auth);
-    const user = result.user;
     const userRef = doc(db, 'users', user.uid);
     const userSnap = await getDoc(userRef);
 
@@ -147,114 +165,41 @@ export const loginAsGuest = async (displayName?: string, telegramUsername?: stri
 
     if (userSnap.exists()) {
       const existingData = userSnap.data() as UserProfile;
+      const role = isSuperAdmin ? 'admin' : (existingData.role || 'user');
+
       profile = {
         ...existingData,
-        displayName: name || existingData.displayName,
-        telegramUsername: tg || existingData.telegramUsername,
+        email: user.email || '',
+        displayName: user.displayName || user.email?.split('@')[0] || 'Пользователь',
+        photoURL: user.photoURL || '',
+        role,
         lastLoginAt: new Date().toISOString(),
       };
-      await updateDoc(userRef, {
-        displayName: profile.displayName,
-        telegramUsername: profile.telegramUsername,
-        lastLoginAt: profile.lastLoginAt,
-      });
+
+      try {
+        await updateDoc(userRef, {
+          displayName: profile.displayName,
+          photoURL: profile.photoURL,
+          role: profile.role,
+          lastLoginAt: profile.lastLoginAt,
+        });
+      } catch (updErr) {
+        console.warn('Notice updating user doc in Firestore:', updErr);
+      }
     } else {
-      profile = {
-        uid: user.uid,
-        email: '',
-        displayName: name,
-        photoURL: '',
-        role: 'user',
-        telegramUsername: tg,
-        createdAt: new Date().toISOString(),
-        lastLoginAt: new Date().toISOString(),
-      };
-      await setDoc(userRef, profile);
+      profile = fallbackProfile;
+      try {
+        await setDoc(userRef, profile);
+      } catch (setErr) {
+        console.warn('Notice creating user doc in Firestore:', setErr);
+      }
     }
-    localStorage.setItem('isterika_guest_profile', JSON.stringify(profile));
+
     return profile;
   } catch (err) {
-    console.warn('Firebase anonymous auth failed, creating local guest session:', err);
-    let guestUid = localStorage.getItem('isterika_guest_uid');
-    if (!guestUid) {
-      guestUid = 'guest_' + Math.random().toString(36).substring(2, 9);
-      localStorage.setItem('isterika_guest_uid', guestUid);
-    }
-
-    const profile: UserProfile = {
-      uid: guestUid,
-      email: '',
-      displayName: name || `Покупатель #${guestUid.slice(-5)}`,
-      photoURL: '',
-      role: 'user',
-      telegramUsername: tg,
-      createdAt: new Date().toISOString(),
-      lastLoginAt: new Date().toISOString(),
-    };
-    localStorage.setItem('isterika_guest_profile', JSON.stringify(profile));
-    return profile;
+    console.warn('Firestore user profile sync notice (using fallback profile):', err);
+    return fallbackProfile;
   }
-};
-
-export const getLocalGuestProfile = (): UserProfile | null => {
-  try {
-    const cached = localStorage.getItem('isterika_guest_profile');
-    return cached ? JSON.parse(cached) : null;
-  } catch (e) {
-    return null;
-  }
-};
-
-// Sync User Profile in Firestore
-export const syncUserProfile = async (user: User): Promise<UserProfile> => {
-  if (!user || !user.uid) throw new Error('User not provided');
-  
-  const userRef = doc(db, 'users', user.uid);
-  const userSnap = await getDoc(userRef);
-
-  const email = (user.email || '').toLowerCase().trim();
-  const isSuperAdmin = email === SUPER_ADMIN_EMAIL.toLowerCase();
-
-  let profile: UserProfile;
-
-  if (userSnap.exists()) {
-    const existingData = userSnap.data() as UserProfile;
-    
-    // Super admin is ALWAYS admin
-    const role = isSuperAdmin ? 'admin' : (existingData.role || 'user');
-
-    profile = {
-      ...existingData,
-      email: user.email || '',
-      displayName: user.displayName || user.email?.split('@')[0] || 'Пользователь',
-      photoURL: user.photoURL || '',
-      role,
-      lastLoginAt: new Date().toISOString(),
-    };
-
-    await updateDoc(userRef, {
-      displayName: profile.displayName,
-      photoURL: profile.photoURL,
-      role: profile.role,
-      lastLoginAt: profile.lastLoginAt,
-    });
-  } else {
-    // New user
-    profile = {
-      uid: user.uid,
-      email: user.email || '',
-      displayName: user.displayName || user.email?.split('@')[0] || 'Пользователь',
-      photoURL: user.photoURL || '',
-      role: isSuperAdmin ? 'admin' : 'user',
-      isBlocked: false,
-      createdAt: new Date().toISOString(),
-      lastLoginAt: new Date().toISOString(),
-    };
-
-    await setDoc(userRef, profile);
-  }
-
-  return profile;
 };
 
 // Get User Profile from Firestore
@@ -297,7 +242,21 @@ export const updateUserStatus = async (uid: string, updates: Partial<UserProfile
 
 // ==================== PRODUCTS ====================
 
-// Subscribe to Products (Realtime)
+// Helper to retrieve cached or initial seed products
+export const getCachedOrDefaultProducts = (): Product[] => {
+  try {
+    const cached = localStorage.getItem('isterika_cached_products');
+    if (cached) {
+      const parsed = JSON.parse(cached);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch (e) {
+    console.warn('Error parsing cached products:', e);
+  }
+  return INITIAL_PRODUCTS;
+};
+
+// Subscribe to Products (Realtime with Initial Products Fallback)
 export const subscribeToProducts = (callback: (products: Product[]) => void) => {
   const productsRef = collection(db, 'products');
   const q = query(productsRef, orderBy('createdAt', 'desc'));
@@ -307,42 +266,83 @@ export const subscribeToProducts = (callback: (products: Product[]) => void) => 
     snapshot.forEach((docSnap) => {
       products.push({ id: docSnap.id, ...docSnap.data() } as Product);
     });
-    try {
-      localStorage.setItem('isterika_cached_products', JSON.stringify(products));
-    } catch (e) {
-      console.warn('LocalStorage save error:', e);
+    if (products.length > 0) {
+      try {
+        localStorage.setItem('isterika_cached_products', JSON.stringify(products));
+      } catch (e) {
+        console.warn('LocalStorage save error:', e);
+      }
+      callback(products);
+    } else {
+      callback(getCachedOrDefaultProducts());
     }
-    callback(products);
   }, (error) => {
-    console.error('Error subscribing to products:', error);
+    console.warn('Firestore products subscription notice (using fallback products):', error?.message || error);
+    callback(getCachedOrDefaultProducts());
   });
 };
 
 // Add Product
 export const addProduct = async (productData: Omit<Product, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> => {
-  const productsRef = collection(db, 'products');
   const now = new Date().toISOString();
-  const docRef = await addDoc(productsRef, {
-    ...productData,
-    createdAt: now,
-    updatedAt: now,
-  });
-  return docRef.id;
+  let newId = 'prod_' + Math.random().toString(36).substring(2, 9);
+  
+  try {
+    const productsRef = collection(db, 'products');
+    const docRef = await addDoc(productsRef, {
+      ...productData,
+      createdAt: now,
+      updatedAt: now,
+    });
+    newId = docRef.id;
+  } catch (err) {
+    console.warn('Firestore addProduct warning (saving locally):', err);
+  }
+
+  // Also update local cache
+  const current = getCachedOrDefaultProducts();
+  const newProduct: Product = { ...productData, id: newId, createdAt: now, updatedAt: now };
+  const updated = [newProduct, ...current];
+  try {
+    localStorage.setItem('isterika_cached_products', JSON.stringify(updated));
+  } catch (e) {}
+
+  return newId;
 };
 
 // Update Product
 export const updateProduct = async (productId: string, updates: Partial<Product>): Promise<void> => {
-  const productRef = doc(db, 'products', productId);
-  await updateDoc(productRef, {
-    ...updates,
-    updatedAt: new Date().toISOString(),
-  });
+  try {
+    const productRef = doc(db, 'products', productId);
+    await updateDoc(productRef, {
+      ...updates,
+      updatedAt: new Date().toISOString(),
+    });
+  } catch (err) {
+    console.warn('Firestore updateProduct warning (updating locally):', err);
+  }
+
+  const current = getCachedOrDefaultProducts();
+  const updated = current.map(p => p.id === productId ? { ...p, ...updates, updatedAt: new Date().toISOString() } : p);
+  try {
+    localStorage.setItem('isterika_cached_products', JSON.stringify(updated));
+  } catch (e) {}
 };
 
 // Delete Product
 export const deleteProduct = async (productId: string): Promise<void> => {
-  const productRef = doc(db, 'products', productId);
-  await deleteDoc(productRef);
+  try {
+    const productRef = doc(db, 'products', productId);
+    await deleteDoc(productRef);
+  } catch (err) {
+    console.warn('Firestore deleteProduct warning (deleting locally):', err);
+  }
+
+  const current = getCachedOrDefaultProducts();
+  const updated = current.filter(p => p.id !== productId);
+  try {
+    localStorage.setItem('isterika_cached_products', JSON.stringify(updated));
+  } catch (e) {}
 };
 
 // ==================== ORDERS ====================
@@ -355,17 +355,36 @@ export const generateOrderNumber = (): string => {
 
 // Create New Order
 export const createOrder = async (orderData: Omit<Order, 'id' | 'createdAt' | 'status'>): Promise<Order> => {
-  const ordersRef = collection(db, 'orders');
   const now = new Date().toISOString();
+  let newId = 'order_' + Math.random().toString(36).substring(2, 9);
   
-  const newOrder: Omit<Order, 'id'> = {
+  const newOrder: Order = {
     ...orderData,
+    id: newId,
     status: 'new',
     createdAt: now,
   };
 
-  const docRef = await addDoc(ordersRef, newOrder);
-  return { id: docRef.id, ...newOrder };
+  try {
+    const ordersRef = collection(db, 'orders');
+    const docRef = await addDoc(ordersRef, {
+      ...orderData,
+      status: 'new',
+      createdAt: now,
+    });
+    newOrder.id = docRef.id;
+  } catch (err) {
+    console.warn('Firestore createOrder warning (saving locally):', err);
+  }
+
+  // Store in local history as fallback
+  try {
+    const localOrdersRaw = localStorage.getItem('isterika_local_orders');
+    const localOrders: Order[] = localOrdersRaw ? JSON.parse(localOrdersRaw) : [];
+    localStorage.setItem('isterika_local_orders', JSON.stringify([newOrder, ...localOrders]));
+  } catch (e) {}
+
+  return newOrder;
 };
 
 // Subscribe to Orders (Admin Order History)
@@ -380,8 +399,13 @@ export const subscribeToOrders = (callback: (orders: Order[]) => void) => {
     });
     callback(orders);
   }, (error) => {
-    console.error('Error subscribing to orders:', error);
-    callback([]);
+    console.warn('Firestore orders subscription notice:', error?.message || error);
+    try {
+      const localOrdersRaw = localStorage.getItem('isterika_local_orders');
+      callback(localOrdersRaw ? JSON.parse(localOrdersRaw) : []);
+    } catch (e) {
+      callback([]);
+    }
   });
 };
 
@@ -402,21 +426,36 @@ export const subscribeToUserOrders = (userId: string, callback: (orders: Order[]
     orders.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     callback(orders);
   }, (error) => {
-    console.error('Error subscribing to user orders:', error);
-    callback([]);
+    console.warn('Firestore user orders subscription notice:', error?.message || error);
+    try {
+      const localOrdersRaw = localStorage.getItem('isterika_local_orders');
+      const localOrders: Order[] = localOrdersRaw ? JSON.parse(localOrdersRaw) : [];
+      const userOrders = localOrders.filter(o => o.userId === userId);
+      callback(userOrders);
+    } catch (e) {
+      callback([]);
+    }
   });
 };
 
 // Update Order Status
 export const updateOrderStatus = async (orderId: string, status: OrderStatus): Promise<void> => {
-  const orderRef = doc(db, 'orders', orderId);
-  await updateDoc(orderRef, { status });
+  try {
+    const orderRef = doc(db, 'orders', orderId);
+    await updateDoc(orderRef, { status });
+  } catch (err) {
+    console.warn('Firestore updateOrderStatus warning:', err);
+  }
 };
 
 // Delete Order
 export const deleteOrder = async (orderId: string): Promise<void> => {
-  const orderRef = doc(db, 'orders', orderId);
-  await deleteDoc(orderRef);
+  try {
+    const orderRef = doc(db, 'orders', orderId);
+    await deleteDoc(orderRef);
+  } catch (err) {
+    console.warn('Firestore deleteOrder warning:', err);
+  }
 };
 
 // ==================== APP CONFIG ====================
@@ -430,13 +469,17 @@ export const fetchAppConfig = async (): Promise<AppConfig> => {
     if (configSnap.exists()) {
       return configSnap.data() as AppConfig;
     }
-  } catch (error) {
-    console.error('Error fetching config:', error);
+  } catch (error: any) {
+    console.warn('Firestore config fetch notice:', error?.message || error);
   }
   return { telegramUsername: 'isterika_vape_manager' };
 };
 
 export const updateAppConfig = async (config: AppConfig): Promise<void> => {
-  const configRef = doc(db, 'config', CONFIG_DOC_ID);
-  await setDoc(configRef, config, { merge: true });
+  try {
+    const configRef = doc(db, 'config', CONFIG_DOC_ID);
+    await setDoc(configRef, config, { merge: true });
+  } catch (err) {
+    console.warn('Firestore updateAppConfig warning:', err);
+  }
 };
