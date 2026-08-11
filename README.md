@@ -1,20 +1,51 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
-</div>
+# ISTERIKA - Vape Store & Catalog
 
-# Run and deploy your AI Studio app
+Премиальный каталог вейп-продукции **ISTERIKA** с онлайн-заказами, панелью администратора, авторизацией Google и интеграцией Firebase / Telegram.
 
-This contains everything you need to run your app locally.
+---
 
-View your app in AI Studio: https://ai.studio/apps/2b5ab7e6-cba8-469c-9dc7-93282d6f713f
+## 🚀 Быстрый запуск на Vercel
 
-## Run Locally
+### Шаг 1. Скачивание проекта и загрузка на GitHub
+1. Скачайте проект через меню **Settings -> Export to ZIP** или **Export to GitHub** в AI Studio.
+2. Если вы скачали ZIP-архив:
+   - Распакуйте его на компьютере.
+   - Инициализируйте Git и создайте репозиторий на GitHub:
+     ```bash
+     git init
+     git add .
+     git commit -m "Initial commit"
+     git branch -M main
+     git remote add origin https://github.com/ВАШ_ЮЗЕРНЕЙМ/isterika-vape-store.git
+     git push -u origin main
+     ```
 
-**Prerequisites:**  Node.js
+### Шаг 2. Деплой на Vercel
+1. Перейдите на [vercel.com](https://vercel.com/) и войдите через GitHub.
+2. Нажмите **Add New... -> Project**.
+3. Выберите ваш репозиторий **isterika-vape-store**.
+4. **Framework Preset**: Выберите **Vite**.
+5. Нажмите **Deploy**.
 
+---
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+## 🛠 Локальная разработка
+
+1. Установите зависимости:
+   ```bash
+   npm install
+   ```
+2. Запустите локальный сервер разработки:
+   ```bash
+   npm run dev
+   ```
+3. Откройте в браузере: `http://localhost:3000`
+
+---
+
+## 📦 Сборка для продакшена
+
+```bash
+npm run build
+```
+Готовые статические файлы будут в папке `dist/`.
